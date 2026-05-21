@@ -11,8 +11,8 @@ struct ContentView: View {
     @Environment(UserStore.self) private var userStore
 
     var body: some View {
-        if false {
-            OnboardingView(isUserOnboarded: .constant(false))
+        if userStore.userData?.isUserOnboarded == false || userStore.userData?.isUserOnboarded == nil {
+            OnboardingView()
         } else {
             NavigationStack {
                 TabView {
@@ -23,7 +23,7 @@ struct ContentView: View {
                         CalendarView(quickLog: .constant(false))
                     }
                     Tab("Insights", systemImage: "chart.bar") {
-                        
+                        InsightsView()
                     }
                     Tab("Profile", systemImage: "person.fill") {
                         ProfileView()
@@ -37,4 +37,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environment(UserStore())
+        .environment(LogPeriodStore())
 }

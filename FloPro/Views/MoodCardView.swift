@@ -14,13 +14,13 @@ struct MoodOption: Identifiable {
 }
 
 struct MoodCardView: View {
-    private let moodOptions: [MoodOption] = [
-        MoodOption(icon: "face.smiling", color: Color(hex: 0xF8C766)),
-        MoodOption(icon: "face.dashed", color: Color(hex: 0xF6CA72)),
-        MoodOption(icon: "face.neutral", color: Color(hex: 0xF4C36B)),
-        MoodOption(icon: "face.smiling.inverse", color: Color(hex: 0xF2B364)),
-        MoodOption(icon: "exclamationmark.bubble.fill", color: Color(hex: 0xEE7D5E))
-    ]
+    private let logSymptomService: LogSymptomService
+    private let moodOptions: [MoodItem] = Mood.allCases.map {
+        .init(mood: $0)
+    }
+    init(logSymptomService: LogSymptomService = LogSymptomService()) {
+        self.logSymptomService = logSymptomService
+    }
     var body: some View {
         CardView {
             VStack(alignment: .leading, spacing: 18) {
@@ -29,23 +29,30 @@ struct MoodCardView: View {
                     .foregroundStyle(Color(hex: 0x202342))
 
                 Text("How are you feeling?")
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .font(
+                        .system(size: 18, weight: .semibold, design: .rounded)
+                    )
                     .foregroundStyle(Color(hex: 0x202342))
 
-                HStack(spacing: 18) {
+                HStack(spacing: 0) {
                     ForEach(moodOptions) { mood in
-                        ZStack {
-                            Circle()
-                                .fill(mood.color)
-                                .frame(width: 52, height: 52)
+                        Button {
+//                            logSymptomService.logSymptoms(symptoms: nil, mood: mood, intensity: nil, day: <#T##LocalDay#>)
+                        } label: {
+                            ZStack {
+                                Circle()
+                                    .fill(mood.tint.opacity(0.12))
+                                    .frame(width: 52, height: 52)
 
-                            Image(systemName: mood.icon)
-                                .font(.system(size: 26, weight: .medium))
-                                .foregroundStyle(Color(hex: 0x6C5333))
+                                Image(systemName: mood.icon)
+                                    .font(.system(size: 26, weight: .medium))
+                                    .foregroundStyle(mood.tint)
+                            }.frame(maxWidth: .infinity)
                         }
+
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .center)
+                .frame(maxWidth: .infinity)
                 .padding(.top, 2)
             }
             .padding(20)

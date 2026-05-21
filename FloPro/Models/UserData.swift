@@ -10,63 +10,35 @@ import Observation
 
 @Observable
 final class UserData: Codable {
-    enum UserGoal: String, CaseIterable, Codable {
+    enum UserGoal: String, CaseIterable, Codable, Hashable {
         case trackCycle = "trackCycle"
+        case getPregnant = "getPregnant"
+        case avoidPregnancy = "avoidPregnancy"
+        case understandMyHealth = "understandMyHealth"
+        var title: String {
+            switch self {
+                case .trackCycle: return "Track Cycle"
+                case .getPregnant: return "Get Pregnant"
+                case .avoidPregnancy: return "Avoid Pregnancy"
+                case .understandMyHealth: return "Understand My Health"
+            }
+        }
     }
 
+    var name = ""
     var cylceLength: Int = 0
     var periodLength: Int = 0
     var age = 0
     var userGoal: UserGoal = .trackCycle
-
-    init(cylceLength: Int, periodLength: Int, age: Int = 0, userGoal: UserGoal) {
+    var isUserOnboarded: Bool = false
+    init(name: String = "", cylceLength: Int, periodLength: Int, age: Int = 0, userGoal: UserGoal, isUserOnboarded: Bool) {
+        self.name = name
         self.cylceLength = cylceLength
         self.periodLength = periodLength
         self.age = age
         self.userGoal = userGoal
+        self.isUserOnboarded = isUserOnboarded
     }
 }
 
-@Observable
-final class UserStore {
-    private let storageKey = "user_data"
 
-    var userData: UserData? {
-        didSet {
-            persistUserData()
-        }
-    }
-
-    init() {
-        userData = loadUserData()
-    }
-
-    func save(_ userData: UserData) {
-        self.userData = userData
-    }
-
-    func clear() {
-        userData = nil
-    }
-
-    private func loadUserData() -> UserData? {
-        guard let data = UserDefaults.standard.data(forKey: storageKey) else {
-            return nil
-        }
-
-        return try? JSONDecoder().decode(UserData.self, from: data)
-    }
-
-    private func persistUserData() {
-        guard let userData else {
-            UserDefaults.standard.removeObject(forKey: storageKey)
-            return
-        }
-
-        guard let encodedData = try? JSONEncoder().encode(userData) else {
-            return
-        }
-
-        UserDefaults.standard.set(encodedData, forKey: storageKey)
-    }
-}

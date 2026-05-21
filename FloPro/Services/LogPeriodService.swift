@@ -8,57 +8,42 @@
 import Foundation
 
 struct LogPeriodService {
-    private let storageKey = "logged_period_dates"
+    private let storageKey = "logged_day_records"
     private let userDefaults: UserDefaults
 
     init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
     }
 
-    func logPeriod(for date: Date, in month: String) {
-        var loggedDates = fetchLoggedPeriods(for: month)
-        loggedDates.insert(dayKey(for: date))
-        persist(loggedDates, for: month)
+    func logDay(_ dayRecord: DayRecord) {
+        persist(dayRecord)
+    }
+    
+    func fetchDay(_ day: LocalDay) -> DayRecord? {
+        let loggedDays = allLoggedDays()
+        return loggedDays.first { $0.day == day}
     }
 
-    func isPeriodLogged(for date: Date, in month: String) -> Bool {
-        fetchLoggedPeriods(for: month).contains(dayKey(for: date))
-    }
+    private func persist(_ dayRecord: DayRecord) {
+        var loggedDays = allLoggedDays()
+        loggedDays = loggedDays.filter { $0.day != dayRecord.day }
+        loggedDays.insert(dayRecord)
 
-    func fetchLoggedPeriods(for month: String) -> Set<String> {
-        allLoggedPeriods()[month] ?? []
-    }
-
-    private func persist(_ loggedDates: Set<String>, for month: String) {
-        var monthDict = allLoggedPeriods()
-        monthDict[month] = loggedDates
-
-        guard let encodedDates = try? JSONEncoder().encode(monthDict) else {
+        guard let encodedDays = try? JSONEncoder().encode(loggedDays) else {
             return
         }
 
-        userDefaults.set(encodedDates, forKey: storageKey)
+        userDefaults.set(encodedDays, forKey: storageKey)
     }
 
-    private func allLoggedPeriods() -> [String: Set<String>] {
-        guard let data = userDefaults.data(forKey: storageKey) else {
-            return [:]
+    func allLoggedDays() -> Set<DayRecord> {
+        guard let data = userDefaults.data(forKey: storageKey),
+              let allLoggedDays = try? JSONDecoder().decode(Set<DayRecord>.self, from: data) else {
+            return []
         }
 
-        if let dates = try? JSONDecoder().decode([String: Set<String>].self, from: data) {
-            return dates
-        }
-
-        if let legacyDates = try? JSONDecoder().decode([String: Set<Date>].self, from: data) {
-            return legacyDates.mapValues { dates in
-                Set(dates.map(dayKey(for:)))
-            }
-        }
-
-        return [:]
+        return allLoggedDays
     }
-
-    private func dayKey(for date: Date) -> String {
-        DayKey(from: date).stringValue
-    }
+    
+    
 }

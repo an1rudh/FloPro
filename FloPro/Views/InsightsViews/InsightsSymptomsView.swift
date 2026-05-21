@@ -17,7 +17,7 @@ struct InsightsSymptomsView: View {
                 subtitle: "Based on your logged cycle history.",
                 rows: topSymptoms.map { symptom, count in
                     InsightRow(
-                        title: symptomTitle(symptom),
+                        title: symptom.title,
                         detail: "\(count) logs",
                         tint: Color(hex: 0xF2A4B8)
                     )
@@ -26,8 +26,33 @@ struct InsightsSymptomsView: View {
                     "Log symptoms in the calendar to see patterns here."
             )
 
-            //            articleSection(items: symptomArticles)
+                ArticleCardView(items: symptomArticles)
         }
+    }
+    
+    private var symptomArticles: [InsightArticle] {
+        [
+            InsightArticle(
+                title: "Managing cramps",
+                subtitle: "Relief ideas for tough days",
+                icon: "waveform.path.ecg",
+                gradient: LinearGradient(
+                    colors: [Color(hex: 0xFFB2B2), Color(hex: 0xFF7A8A)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            ),
+            InsightArticle(
+                title: "Bloating and cycle changes",
+                subtitle: "Why symptoms shift over time",
+                icon: "drop.fill",
+                gradient: LinearGradient(
+                    colors: [Color(hex: 0xFFC38E), Color(hex: 0xF28A76)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+        ]
     }
 
     var topSymptoms: [(Symptom, Int)] {
@@ -49,22 +74,6 @@ struct InsightsSymptomsView: View {
         .map { ($0.key, $0.value) }
     }
 
-    private func symptomTitle(_ symptom: Symptom) -> String {
-        switch symptom {
-        case .cramps:
-            return "Cramps"
-        case .headache:
-            return "Headache"
-        case .bloating:
-            return "Bloating"
-        case .acne:
-            return "Acne"
-        case .fatigue:
-            return "Fatigue"
-        case .backache:
-            return "Backache"
-        }
-    }
 }
 
 #Preview {

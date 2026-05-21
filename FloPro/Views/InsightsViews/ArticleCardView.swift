@@ -7,14 +7,6 @@
 
 import SwiftUI
 
-struct InsightArticle: Identifiable {
-    let id = UUID()
-    let title: String
-    let subtitle: String
-    let icon: String
-    let gradient: LinearGradient
-}
-
 struct ArticleCardView: View {
     let items: [InsightArticle]
     var body: some View {

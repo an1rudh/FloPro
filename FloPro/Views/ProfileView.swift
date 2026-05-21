@@ -24,25 +24,17 @@ struct ProfileView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [
-                    Color(hex: 0xFFF9FB),
-                    Color(hex: 0xFFF3F8),
-                    Color(hex: 0xFFF9FD),
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            ).ignoresSafeArea()
-
+            BackdropView()
             VStack(spacing: 24) {
                 HStack {
-                    Circle()
+                    Image(systemName: "person.crop.circle.fill")
+                        .resizable()
                         .frame(width: 100, height: 100)
-                        .foregroundColor(.gray.opacity(0.4))
+                        .foregroundColor(.gray)
 
                     VStack(spacing: 8) {
                         HStack {
-                            Text("Aditi")
+                            Text("\(userStore.userData?.name ?? "")")
                                 .font(.title)
                                 .fontWeight(.semibold)
                             Spacer()
@@ -92,11 +84,12 @@ struct ProfileView: View {
                     VStack(alignment: .leading, spacing: 14) {
                         Text("Developer Tools")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(Color(hex: 0x3F3955))
+                            .padding()
+                        
 
                         Text("Remove all locally saved onboarding and period tracking data from this device.")
                             .font(.system(size: 14))
-                            .foregroundStyle(.secondary)
+                            .padding(.horizontal)
 
                         Button(role: .destructive) {
                             showResetAlert = true
@@ -112,6 +105,8 @@ struct ProfileView: View {
                                 )
                         }
                         .buttonStyle(.plain)
+                        .padding()
+                        
 
                         if let resetMessage {
                             Text(resetMessage)
@@ -138,7 +133,7 @@ struct ProfileView: View {
 
     private func clearLocalData() {
         userStore.clear()
-        UserDefaults.standard.removeObject(forKey: "logged_period_dates")
+        UserDefaults.standard.removeObject(forKey: "logged_day_records")
         resetMessage = "Local saved data was cleared."
     }
 }

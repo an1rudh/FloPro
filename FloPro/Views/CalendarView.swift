@@ -8,40 +8,43 @@
 import SwiftUI
 
 struct CalendarView: View {
-    @StateObject private var calendarViewModel = CalendarViewModel()
+    @Environment(LogPeriodStore.self) private var logPeriodStore
+    @Environment(UserStore.self) private var userStore
+    @State private var calendarViewModel = CalendarViewModel()
+    @State private var calendarItems = CalendarItems()
     @Binding var quickLog: Bool
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [
-                    Color(hex: 0xFFF9FB),
-                    Color(hex: 0xFFF3F8),
-                    Color(hex: 0xFFF9FD),
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            ).ignoresSafeArea()
-
+            BackdropView()
             ScrollView {
                 VStack {
-                    HStack {
-                        Button {
-                            calendarViewModel.changeMonth(by: -1)
-                        } label: {
-                            Image(systemName: "chevron.left").font(.title2)
-                                .foregroundColor(.black)
+                    ZStack {
+                        if quickLog {
+                            HStack {
+                                BackButtonView()
+                                Spacer()
+                            }
                         }
-                        Text(calendarViewModel.monthYearString(from: nil))
-                            .font(
-                                .title
-                            ).fontWeight(.bold).padding(.horizontal)
-                        Button {
-                            calendarViewModel.changeMonth(by: 1)
-                        } label: {
-                            Image(systemName: "chevron.right").font(.title2)
-                                .foregroundColor(.black)
-                        }
+                        HStack {
+                            Button {
+                                calendarViewModel.changeMonth(by: -1)
+                            } label: {
+                                Image(systemName: "chevron.left").font(.title2)
+                                    .foregroundColor(.black)
+                            }
+                            Text(calendarViewModel.currentMonth.formatted(.dateTime.month(.abbreviated).year()))
+                                .font(.title).fontWeight(.bold).padding(
+                                    .horizontal,
+                                    2
+                                )
+                            Button {
+                                calendarViewModel.changeMonth(by: 1)
+                            } label: {
+                                Image(systemName: "chevron.right").font(.title2)
+                                    .foregroundColor(.black)
+                            }
 
+                        }
                     }
                     LazyVGrid(
                         columns: calendarViewModel.columns,
@@ -59,56 +62,30 @@ struct CalendarView: View {
                         spacing: 12
                     ) {
                         ForEach(
-                            calendarViewModel.getMonthArray().enumerated(),
+                            Array(
+                                calendarViewModel.calendarDayCells()
+                                    .enumerated()
+                            ),
                             id: \.offset
                         ) {
- index,
- dayDate in
-                            if dayDate.0 == 0 {
+                            _,
+                            calDayCell in
+                            if calDayCell == nil {
                                 Color.clear.frame(width: 36, height: 36)
                             } else {
                                 if quickLog {
                                     Button {
-                                        calendarViewModel
-                                            .logPeriod(for: dayDate.1!)
-                                    } label : {
-                                        Text("\(dayDate.0)")
-                                            .font(.title3).frame(
-                                                width: 45,
-                                                height: 45
-                                            )
-                                            .foregroundStyle(.black)
-                                            .background(
-                                                calendarViewModel
-                                                    .getBackgroundColor(
-                                                        date: dayDate.1!
-                                                    )
-                                            )
-                                            .clipShape(
-                                                .circle
-                                            )
+                                        logPeriodStore.logPeriod(for: calDayCell!.day)
+                                        syncCalendarState()
+                                    } label: {
+                                        dayCellLabel(for: calDayCell!.dayNumber, of: calDayCell!.day)
                                     }
                                 } else {
-                                    
+
                                     NavigationLink {
-                                        SymptomLogView()
+                                        SymptomLogView(day: calDayCell!.day)
                                     } label: {
-                                        Text("\(dayDate.0)").fontWeight(.bold)
-                                            .buttonStyle(
-                                                .plain
-                                            ).font(.title3).frame(
-                                                width: 45,
-                                                height: 45
-                                            )
-                                            .background(
-                                                calendarViewModel
-                                                    .getBackgroundColor(
-                                                        date: dayDate.1!
-                                                    )
-                                            )
-                                            .clipShape(
-                                                .circle
-                                            )
+                                        dayCellLabel(for: calDayCell!.dayNumber, of: calDayCell!.day)
                                     }
                                 }
                             }
@@ -122,63 +99,106 @@ struct CalendarView: View {
 
             }
         }
+        .navigationBarBackButtonHidden(true)
+        .onAppear {
+            syncCalendarState()
+        }
+        .onChange(of: logPeriodStore.loggedDays) {
+            syncCalendarState()
+        }
+    }
 
+    private func syncCalendarState() {
+        calendarViewModel.setLoggedDays(
+            logPeriodStore.loggedDays,
+            userData: userStore.userData
+        )
     }
 
     private var calendarLegend: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 28) {
-                legendItem(
-                    color: Color(hex: 0xF7A8C8),
-                    title: "Period"
-                )
-                legendItem(
-                    color: Color(hex: 0xD9E6FF),
-                    title: "Fertile Window"
-                )
-                legendItem(
-                    symbol: "sparkle",
-                    symbolColor: Color(hex: 0xF7B238),
-                    title: "Ovulation"
-                )
+        LazyVGrid(
+            columns: [GridItem(.adaptive(minimum: 120), alignment: .leading)],
+            alignment: .leading,
+            spacing: 10
+        ) {
+            ForEach(CalendarItems.LegendItemTitle.allCases, id: \.self) {
+                title in
+                legendItem(title: title)
             }
-
-            legendItem(
-                color: Color(hex: 0xFBE9EF),
-                title: "Today"
-            )
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func legendItem(
-        color: Color? = nil,
-        symbol: String? = nil,
-        symbolColor: Color = .primary,
-        title: String
-    ) -> some View {
-        HStack(spacing: 10) {
+    @ViewBuilder
+    private func dayCellLabel(for dayNumber: Int, of day: LocalDay) -> some View {
+        Text("\(dayNumber)")
+            .fontWeight(.semibold)
+            .frame(width: 45, height: 45)
+            .foregroundColor(.gray)
+            .background(calendarViewModel.getBackgroundColor(for: day))
+            .clipShape(.circle)
+            .overlay {
+                if calendarViewModel.isToday(day) {
+                    Circle().stroke(
+                        Color.black,
+                        style: StrokeStyle(lineWidth: 1)
+                    )
+                }
+            }
+            .overlay(alignment: .topTrailing) {
+                if calendarViewModel.showOvulationIndicator(for: day) {
+                    Image(
+                        systemName: CalendarItems.LegendItemTitle.ovulation
+                            .symbol ?? ""
+                    )
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(
+                        CalendarItems.LegendItemTitle.ovulation.symbolColor
+                            ?? .primary
+                    )
+                    .offset(x: 2, y: -0.5)
+                }
+            }
+
+    }
+
+    @ViewBuilder
+    private func legendItem(title: CalendarItems.LegendItemTitle) -> some View {
+        HStack(alignment: .center) {
             Group {
-                if let color {
-                    Circle()
-                        .fill(color)
-                        .frame(width: 20, height: 20)
-                } else if let symbol {
+                if let symbol = title.symbol {
+                    let symbolColor = title.symbolColor!
                     Image(systemName: symbol)
                         .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(symbolColor)
                         .frame(width: 20, height: 20)
+                } else {
+                    Circle()
+                        .fill(title.color)
+                        .frame(width: 20, height: 20)
+                        .overlay {
+                            if title == .today {
+                                Circle().stroke(
+                                    Color.black,
+                                    style: StrokeStyle(lineWidth: 1)
+                                )
+                            }
+                        }
                 }
             }
 
-            Text(title)
+            Text(title.title)
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundStyle(.primary)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
         }
     }
 }
 
 #Preview {
-    CalendarView(quickLog: .constant(true))
+    CalendarView(quickLog: .constant(false))
+        .environment(UserStore())
+        .environment(LogPeriodStore())
 }

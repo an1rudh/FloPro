@@ -8,19 +8,10 @@
 import SwiftUI
 
 struct HomeScreenView: View {
+    @Environment(UserStore.self) private var userStore
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [
-                    Color(hex: 0xFFF9FB),
-                    Color(hex: 0xFFF3F8),
-                    Color(hex: 0xFFF9FD),
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-
+            BackdropView()
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 18) {
                     header
@@ -38,7 +29,7 @@ struct HomeScreenView: View {
 
     private var header: some View {
         HStack {
-            Text("Good morning, Aditi 🌸")
+            Text("Good morning, \(userStore.userData?.name ?? "") 🌸")
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .foregroundStyle(Color(hex: 0x202342))
             Spacer()
@@ -49,4 +40,6 @@ struct HomeScreenView: View {
 
 #Preview {
     HomeScreenView()
+        .environment(UserStore())
+        .environment(LogPeriodStore())
 }

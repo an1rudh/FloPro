@@ -9,7 +9,15 @@ import SwiftUI
 
 struct BackdropView: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        LinearGradient(
+            colors: [
+                Color(hex: 0xFFF9FB),
+                Color(hex: 0xFFF3F8),
+                Color(hex: 0xFFF9FD),
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        ).ignoresSafeArea()
     }
 }
 

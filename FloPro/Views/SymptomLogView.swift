@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SymptomLogView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(LogPeriodStore.self) private var logPeriodStore
 
     @State private var selectedSymptoms: Set<Symptom> = []
     @State private var selectedMood: Mood?
@@ -185,7 +186,7 @@ struct SymptomLogView: View {
 
     private var saveButton: some View {
         Button {
-            logSymptomService.logSymptoms(
+            logPeriodStore.logSymptoms(
                 symptoms: selectedSymptoms,
                 mood: selectedMood,
                 intensity: selectedIntensity,
@@ -226,4 +227,5 @@ struct SymptomLogView: View {
     NavigationStack {
         SymptomLogView(day: LocalDay(year: 2016, month: 5, day: 21))
     }
+    .environment(LogPeriodStore())
 }

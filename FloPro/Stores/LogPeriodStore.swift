@@ -28,13 +28,36 @@ final class LogPeriodStore {
             symptomIntensity: current?.symptomIntensity
         )
 
-        loggedDays[day] = updatedRecord
-        logPeriodService.logDay(updatedRecord)
+        save(updatedRecord)
+    }
+
+    func logSymptoms(
+        symptoms: Set<Symptom>,
+        mood: Mood?,
+        intensity: SymptomIntensity,
+        day: LocalDay
+    ) {
+        let current = loggedDays[day]
+        let updatedRecord = DayRecord(
+            day: day,
+            isPeriod: current?.isPeriod ?? false,
+            periodFlow: current?.periodFlow,
+            symptoms: symptoms.isEmpty ? nil : symptoms,
+            mood: mood,
+            symptomIntensity: symptoms.isEmpty && mood == nil ? nil : intensity
+        )
+
+        save(updatedRecord)
     }
 
     func refresh() {
         loggedDays = Dictionary(
             uniqueKeysWithValues: logPeriodService.allLoggedDays().map { ($0.day, $0) }
         )
+    }
+
+    private func save(_ dayRecord: DayRecord) {
+        loggedDays[dayRecord.day] = dayRecord
+        logPeriodService.logDay(dayRecord)
     }
 }
