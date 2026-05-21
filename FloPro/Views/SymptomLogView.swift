@@ -10,53 +10,28 @@ import SwiftUI
 struct SymptomLogView: View {
     @Environment(\.dismiss) private var dismiss
 
-    @State private var selectedSymptoms: Set<String> = []
+    @State private var selectedSymptoms: Set<Symptom> = []
+    @State private var selectedMood: Mood?
     @State private var selectedIntensity: SymptomIntensity = .moderate
 
     let date: Date
-    let onSave: (SymptomLogEntry) -> Void
+    let logSymptomService: LogSymptomService
+    let day: LocalDay
 
-    private let physicalSymptoms: [SymptomItem] = [
-        .init(title: "Cramps", icon: "bolt.fill", tint: Color(hex: 0xF59D62)),
-        .init(title: "Headache", icon: "brain.head.profile", tint: Color(hex: 0x9581F2)),
-        .init(title: "Bloating", icon: "drop.fill", tint: Color(hex: 0xEF7D85)),
-        .init(title: "Acne", icon: "circle.grid.2x2.fill", tint: Color(hex: 0xF38A6A)),
-        .init(title: "Fatigue", icon: "sun.max.fill", tint: Color(hex: 0xF4B955)),
-        .init(title: "Backache", icon: "figure.walk", tint: Color(hex: 0x8F79F1))
-    ]
-
-    private let emotionalSymptoms: [SymptomItem] = [
-        .init(title: "Happy", icon: "face.smiling.fill", tint: Color(hex: 0x8A74F1)),
-        .init(title: "Sad", icon: "cloud.drizzle.fill", tint: Color(hex: 0x7C96F6)),
-        .init(title: "Irritated", icon: "flame.fill", tint: Color(hex: 0xF58AA8)),
-        .init(title: "Anxious", icon: "exclamationmark.circle.fill", tint: Color(hex: 0xF78BAB)),
-        .init(title: "Calm", icon: "leaf.fill", tint: Color(hex: 0xF3B85A)),
-        .init(title: "Excited", icon: "sparkles", tint: Color(hex: 0xF39A44))
-    ]
-
-    init(date: Date = .now, onSave: @escaping (SymptomLogEntry) -> Void = { _ in }) {
+    init(date: Date = .now, logSymptomService: LogSymptomService = LogSymptomService(), day: LocalDay) {
         self.date = date
-        self.onSave = onSave
+        self.logSymptomService = logSymptomService
+        self.day = day
     }
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [
-                    Color(hex: 0xFFF9FB),
-                    Color(hex: 0xFFF3F8),
-                    Color(hex: 0xFFF8FE)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-
+            BackdropView()
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 28) {
                     headerView
-                    symptomSection(title: "Physical", items: physicalSymptoms)
-                    symptomSection(title: "Emotional", items: emotionalSymptoms)
+                    symptomSection(title: "Physical", items: logSymptomService.physicalSymptoms)
+                    moodSection(title: "Emotional", items: logSymptomService.moods)
                     intensitySection
                     saveButton
                 }
@@ -71,17 +46,7 @@ struct SymptomLogView: View {
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(Color(hex: 0x44405B))
-                        .frame(width: 36, height: 36)
-                        .background(Color.white.opacity(0.8), in: Circle())
-                }
-                .buttonStyle(.plain)
-
+                BackButtonView()
                 Spacer()
 
                 Text("Symptoms")
@@ -123,36 +88,68 @@ struct SymptomLogView: View {
         }
     }
 
+    private func moodSection(title: String, items: [MoodItem]) -> some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Text(title)
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(Color(hex: 0x3F3955))
+
+            LazyVGrid(
+                columns: Array(repeating: GridItem(.flexible(), spacing: 18), count: 3),
+                spacing: 18
+            ) {
+                ForEach(items) { item in
+                    moodButton(for: item)
+                }
+            }
+        }
+    }
+
     private func symptomButton(for item: SymptomItem) -> some View {
-        let isSelected = selectedSymptoms.contains(item.title)
+        let isSelected = selectedSymptoms.contains(item.symptom)
 
         return Button {
             toggleSelection(for: item)
         } label: {
-            VStack(spacing: 10) {
-                ZStack {
-                    Circle()
-                        .fill(item.tint.opacity(isSelected ? 0.24 : 0.12))
-                        .frame(width: 72, height: 72)
-                        .overlay(
-                            Circle()
-                                .stroke(item.tint.opacity(isSelected ? 0.6 : 0), lineWidth: 1.5)
-                        )
-
-                    Image(systemName: item.icon)
-                        .font(.system(size: 26, weight: .medium))
-                        .foregroundStyle(item.tint)
-                }
-
-                Text(item.title)
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(Color(hex: 0x4A455F))
-                    .multilineTextAlignment(.center)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 4)
+            logItemLabel(title: item.title, icon: item.icon, tint: item.tint, isSelected: isSelected)
         }
         .buttonStyle(.plain)
+    }
+
+    private func moodButton(for item: MoodItem) -> some View {
+        let isSelected = selectedMood == item.mood
+
+        return Button {
+            toggleSelection(for: item)
+        } label: {
+            logItemLabel(title: item.title, icon: item.icon, tint: item.tint, isSelected: isSelected)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func logItemLabel(title: String, icon: String, tint: Color, isSelected: Bool) -> some View {
+        VStack(spacing: 10) {
+            ZStack {
+                Circle()
+                    .fill(tint.opacity(isSelected ? 0.24 : 0.12))
+                    .frame(width: 72, height: 72)
+                    .overlay(
+                        Circle()
+                            .stroke(tint.opacity(isSelected ? 0.6 : 0), lineWidth: 1.5)
+                    )
+
+                Image(systemName: icon)
+                    .font(.system(size: 26, weight: .medium))
+                    .foregroundStyle(tint)
+            }
+
+            Text(title)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(Color(hex: 0x4A455F))
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 4)
     }
 
     private var intensitySection: some View {
@@ -188,12 +185,11 @@ struct SymptomLogView: View {
 
     private var saveButton: some View {
         Button {
-            onSave(
-                SymptomLogEntry(
-                    date: date,
-                    symptoms: selectedSymptoms.sorted(),
-                    intensity: selectedIntensity
-                )
+            logSymptomService.logSymptoms(
+                symptoms: selectedSymptoms,
+                mood: selectedMood,
+                intensity: selectedIntensity,
+                day: day
             )
             dismiss()
         } label: {
@@ -213,48 +209,21 @@ struct SymptomLogView: View {
     }
 
     private func toggleSelection(for item: SymptomItem) {
-        if selectedSymptoms.contains(item.title) {
-            selectedSymptoms.remove(item.title)
+        if selectedSymptoms.contains(item.symptom) {
+            selectedSymptoms.remove(item.symptom)
         } else {
-            selectedSymptoms.insert(item.title)
+            selectedSymptoms.insert(item.symptom)
         }
+    }
+
+    private func toggleSelection(for item: MoodItem) {
+        selectedMood = selectedMood == item.mood ? nil : item.mood
     }
 }
 
-private struct SymptomItem: Identifiable {
-    let id = UUID()
-    let title: String
-    let icon: String
-    let tint: Color
-}
-
-struct SymptomLogEntry {
-    let date: Date
-    let symptoms: [String]
-    let intensity: SymptomIntensity
-}
-
-enum SymptomIntensity: CaseIterable, Identifiable {
-    case mild
-    case moderate
-    case severe
-
-    var id: Self { self }
-
-    var title: String {
-        switch self {
-        case .mild:
-            return "Mild"
-        case .moderate:
-            return "Moderate"
-        case .severe:
-            return "Severe"
-        }
-    }
-}
 
 #Preview {
     NavigationStack {
-        SymptomLogView()
+        SymptomLogView(day: LocalDay(year: 2016, month: 5, day: 21))
     }
 }
