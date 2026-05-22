@@ -20,7 +20,6 @@ struct CycleHistoryChartView: View {
         } else {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .bottom) {
-                    Spacer()
                     ForEach(
                         Array(displayEntries.enumerated()),
                         id: \.element.id
