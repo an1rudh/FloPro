@@ -27,9 +27,9 @@ struct LogSymptomService {
     }
     
     func logSymptoms(
-        symptoms: Set<Symptom>,
+        symptoms: Set<Symptom>?,
         mood: Mood?,
-        intensity: SymptomIntensity,
+        intensity: SymptomIntensity?,
         day: LocalDay
     ) {
         let currentRecord = logPeriodService.fetchDay(day)
@@ -37,9 +37,9 @@ struct LogSymptomService {
             day: day,
             isPeriod: currentRecord?.isPeriod ?? false,
             periodFlow: currentRecord?.periodFlow,
-            symptoms: symptoms.isEmpty ? nil : symptoms,
-            mood: mood,
-            symptomIntensity: symptoms.isEmpty && mood == nil ? nil : intensity
+            symptoms: symptoms ?? currentRecord?.symptoms ?? [],
+            mood: mood ?? currentRecord?.mood,
+            symptomIntensity: intensity ?? currentRecord?.symptomIntensity
         )
 
         logPeriodService.logDay(updatedRecord)
