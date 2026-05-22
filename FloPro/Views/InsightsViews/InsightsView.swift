@@ -21,11 +21,11 @@ struct InsightsView: View {
                     sectionPicker
                     switch selectedSection {
                     case .overview:
-                        InsightsOverviewView(loggedRecords: loggedRecords)
+                        InsightsOverviewView(loggedRecords: logPeriodStore.loggedRecords)
                     case .symptoms:
-                        InsightsSymptomsView(loggedRecords: loggedRecords)
+                        InsightsSymptomsView(loggedRecords: logPeriodStore.loggedRecords)
                     case .mood:
-                        InsightsMoodView(loggedRecords: loggedRecords)
+                        InsightsMoodView(loggedRecords: logPeriodStore.loggedRecords)
                     case .sleep:
                         InsightsSleepView()
                     }
@@ -33,10 +33,6 @@ struct InsightsView: View {
                 .padding(.all)
             }
         }
-    }
-    
-    private var loggedRecords: [DayRecord] {
-        Array(logPeriodStore.loggedDays.values)
     }
 
     private var header: some View {

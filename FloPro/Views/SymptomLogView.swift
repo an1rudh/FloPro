@@ -13,11 +13,10 @@ struct SymptomLogView: View {
 
     @State private var selectedSymptoms: Set<Symptom> = []
     @State private var selectedMood: Mood?
-    @State private var selectedIntensity: SymptomIntensity = .moderate
-
-    let date: Date
-    let logSymptomService: LogSymptomService
-    let day: LocalDay
+    
+    private let logSymptomService: LogSymptomService
+    private let date: Date
+    private let day: LocalDay
 
     init(date: Date = .now, logSymptomService: LogSymptomService = LogSymptomService(), day: LocalDay) {
         self.date = date
@@ -33,7 +32,6 @@ struct SymptomLogView: View {
                     headerView
                     symptomSection(title: "Physical", items: logSymptomService.physicalSymptoms)
                     moodSection(title: "Emotional", items: logSymptomService.moods)
-                    intensitySection
                     saveButton
                 }
                 .padding(.horizontal, 24)
@@ -42,6 +40,9 @@ struct SymptomLogView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .onAppear {
+            loadDraft()
+        }
     }
 
     private var headerView: some View {
@@ -153,43 +154,11 @@ struct SymptomLogView: View {
         .padding(.vertical, 4)
     }
 
-    private var intensitySection: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            Text("Intensity")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(Color(hex: 0x3F3955))
-
-            HStack(spacing: 12) {
-                ForEach(SymptomIntensity.allCases) { intensity in
-                    Button {
-                        selectedIntensity = intensity
-                    } label: {
-                        Text(intensity.title)
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(selectedIntensity == intensity ? .white : Color(hex: 0x5F5973))
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 52)
-                            .background(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .fill(selectedIntensity == intensity ? Color(hex: 0xF07DA1) : Color.white.opacity(0.78))
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .stroke(Color(hex: 0xEFE8F0), lineWidth: selectedIntensity == intensity ? 0 : 1)
-                            )
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-    }
-
     private var saveButton: some View {
         Button {
             logPeriodStore.logSymptoms(
                 symptoms: selectedSymptoms,
                 mood: selectedMood,
-                intensity: selectedIntensity,
                 day: day
             )
             dismiss()
@@ -201,11 +170,17 @@ struct SymptomLogView: View {
                 .frame(height: 58)
                 .background(
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(Color(hex: 0xF07DA1))
+                        .fill(isSaveDisabled ? Color.gray.opacity(0.4) : Color(hex: 0xF07DA1))
                 )
-                .shadow(color: Color(hex: 0xF07DA1).opacity(0.25), radius: 16, x: 0, y: 10)
+                .shadow(
+                    color: isSaveDisabled ? .clear : Color(hex: 0xF07DA1).opacity(0.25),
+                    radius: 16,
+                    x: 0,
+                    y: 10
+                )
         }
         .buttonStyle(.plain)
+        .disabled(isSaveDisabled)
         .padding(.top, 4)
     }
 
@@ -219,6 +194,18 @@ struct SymptomLogView: View {
 
     private func toggleSelection(for item: MoodItem) {
         selectedMood = selectedMood == item.mood ? nil : item.mood
+    }
+
+    private func loadDraft() {
+        let record = logPeriodStore.record(for: day)
+        selectedSymptoms = record?.symptoms ?? []
+        selectedMood = record?.mood
+    }
+    
+    private var isSaveDisabled: Bool {
+        let record = logPeriodStore.record(for: day)
+        return selectedSymptoms == record?.symptoms ?? []
+            && selectedMood == record?.mood
     }
 }
 

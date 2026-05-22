@@ -37,25 +37,6 @@ struct MoodItem: Identifiable {
     var id: Mood { mood }
 }
 
-enum SymptomIntensity: String, CaseIterable, Codable, Hashable, Identifiable {
-    case mild
-    case moderate
-    case severe
-
-    var id: Self { self }
-
-    var title: String {
-        switch self {
-        case .mild:
-            return "Mild"
-        case .moderate:
-            return "Moderate"
-        case .severe:
-            return "Severe"
-        }
-    }
-}
-
 enum Symptom: String, CaseIterable, Codable, Hashable {
     case cramps = "cramps"
     case headache = "headache"

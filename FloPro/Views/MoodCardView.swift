@@ -33,10 +33,19 @@ struct MoodCardView: View {
     var body: some View {
         CardView {
             VStack(alignment: .leading, spacing: 18) {
-                Text("Today")
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color(hex: 0x202342))
-                
+                HStack {
+                    Text("Today")
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color(hex: 0x202342))
+                    Spacer()
+                    NavigationLink {
+                        SymptomLogView(day: localDay)
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.system(size: 22))
+                            .foregroundStyle(Color(hex: 0x202342))
+                    }
+                }
                 Text("How are you feeling?")
                     .font(
                         .system(size: 18, weight: .semibold, design: .rounded)
@@ -46,13 +55,14 @@ struct MoodCardView: View {
                 HStack(spacing: 0) {
                     ForEach(moodOptions) { mood in
                         Button {
-                            let moodSel: Mood?
-                            moodSel = todayRecord?.mood == mood.mood ? nil : mood.mood
-                            logPeriodStore.logSymptoms(symptoms: nil, mood: moodSel, intensity: nil, day: self.localDay)
+                            let currentMood = logPeriodStore.record(for: localDay)?.mood
+                            let selectedMood = currentMood == mood.mood ? nil : mood.mood
+                            logPeriodStore.logSymptoms(symptoms: nil, mood: selectedMood, day: localDay)
                         } label: {
                             ZStack {
                                 Circle()
-                                    .fill(todayRecord?.mood == mood.mood ? mood.tint.opacity(0.5) : mood.tint.opacity(0.12))
+                                    .stroke(mood.tint.opacity(isSelected(mood) ? 0.6 : 0), lineWidth: 1.5)
+                                    .fill(mood.tint.opacity(isSelected(mood) ? 0.5 : 0.12))
                                     .frame(width: 48, height: 48)
                                 
                                 Image(systemName: mood.icon)
@@ -70,12 +80,8 @@ struct MoodCardView: View {
         }
     }
     
-    private var loggedRecords: [DayRecord] {
-        Array(logPeriodStore.loggedDays.values)
-    }
-    
-    private var todayRecord: DayRecord? {
-        logPeriodStore.loggedDays[localDay]
+    private func isSelected(_ mood: MoodItem) -> Bool {
+        logPeriodStore.record(for: localDay)?.mood == mood.mood
     }
 }
 

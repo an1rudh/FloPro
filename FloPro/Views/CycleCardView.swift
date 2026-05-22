@@ -45,7 +45,7 @@ struct CycleCardView: View {
     
     private var cycleSummary: CycleInsightSummary? {
         return cyclePredictionService.insightSummary(
-            from: loggedRecords,
+            from: logPeriodStore.loggedRecords,
             defaultCycleLength: userStore.userData?.cylceLength ?? 28,
             defaultPeriodLength: userStore.userData?.periodLength ?? 5,
             referenceDate: Date()
@@ -56,13 +56,9 @@ struct CycleCardView: View {
         !logPeriodStore.loggedDays.isEmpty
     }
 
-    private var loggedRecords: [DayRecord] {
-        Array(logPeriodStore.loggedDays.values)
-    }
-
     private var periodInDays: Int {
         cyclePredictionService.nextPeriodInDays(
-            from: loggedRecords,
+            from: logPeriodStore.loggedRecords,
             defaultCycleLength: userStore.userData?.cylceLength ?? 28,
             referenceDate: Date()
         )

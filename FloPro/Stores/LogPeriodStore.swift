@@ -13,6 +13,10 @@ final class LogPeriodStore {
 
     private(set) var loggedDays: [LocalDay: DayRecord] = [:]
 
+    var loggedRecords: [DayRecord] {
+        loggedDays.values.sorted { $0.day < $1.day }
+    }
+
     init() {
         refresh()
     }
@@ -25,7 +29,6 @@ final class LogPeriodStore {
             periodFlow: current?.periodFlow,
             symptoms: current?.symptoms,
             mood: current?.mood,
-            symptomIntensity: current?.symptomIntensity
         )
 
         save(updatedRecord)
@@ -34,7 +37,6 @@ final class LogPeriodStore {
     func logSymptoms(
         symptoms: Set<Symptom>?,
         mood: Mood?,
-        intensity: SymptomIntensity?,
         day: LocalDay
     ) {
         let currentRecord = loggedDays[day]
@@ -43,11 +45,14 @@ final class LogPeriodStore {
             isPeriod: currentRecord?.isPeriod ?? false,
             periodFlow: currentRecord?.periodFlow,
             symptoms: symptoms ?? currentRecord?.symptoms ?? [],
-            mood: mood == currentRecord?.mood ? nil : mood ?? nil,
-            symptomIntensity: intensity ?? currentRecord?.symptomIntensity
+            mood: mood,
         )
 
         save(updatedRecord)
+    }
+
+    func record(for day: LocalDay) -> DayRecord? {
+        loggedDays[day]
     }
 
     func refresh() {

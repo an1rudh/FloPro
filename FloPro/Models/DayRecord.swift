@@ -13,7 +13,6 @@ struct DayRecord: Codable, Hashable, Identifiable {
     var periodFlow: Flow?
     var symptoms: Set<Symptom>?
     var mood: Mood?
-    var symptomIntensity: SymptomIntensity?
 
     var id: LocalDay { day }
 }
