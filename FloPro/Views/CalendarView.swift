@@ -43,7 +43,7 @@ struct CalendarView: View {
                                 Image(systemName: "chevron.right").font(.title2)
                                     .foregroundColor(.black)
                             }
-
+                            
                         }
                     }
                     LazyVGrid(
@@ -81,7 +81,7 @@ struct CalendarView: View {
                                         dayCellLabel(for: calDayCell!.dayNumber, of: calDayCell!.day)
                                     }
                                 } else {
-
+                                    
                                     NavigationLink {
                                         SymptomLogView(day: calDayCell!.day)
                                     } label: {
@@ -91,12 +91,11 @@ struct CalendarView: View {
                             }
                         }
                     }
-                    if !quickLog {
-                        calendarLegend
-                            .padding(.vertical, 20)
-                    }
+                    
+                    calendarLegend
+                        .padding(.vertical, 20)
                 }.padding()
-
+                
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -107,14 +106,14 @@ struct CalendarView: View {
             syncCalendarState()
         }
     }
-
+    
     private func syncCalendarState() {
         calendarViewModel.setLoggedDays(
             logPeriodStore.loggedDays,
             userData: userStore.userData
         )
     }
-
+    
     private var calendarLegend: some View {
         LazyVGrid(
             columns: [GridItem(.adaptive(minimum: 120), alignment: .leading)],
@@ -128,7 +127,7 @@ struct CalendarView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-
+    
     @ViewBuilder
     private func dayCellLabel(for dayNumber: Int, of day: LocalDay) -> some View {
         Text("\(dayNumber)")
@@ -154,14 +153,14 @@ struct CalendarView: View {
                     .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(
                         CalendarItems.LegendItemTitle.ovulation.symbolColor
-                            ?? .primary
+                        ?? .primary
                     )
                     .offset(x: 2, y: -0.5)
                 }
             }
-
+        
     }
-
+    
     @ViewBuilder
     private func legendItem(title: CalendarItems.LegendItemTitle) -> some View {
         HStack(alignment: .center) {
@@ -186,7 +185,7 @@ struct CalendarView: View {
                         }
                 }
             }
-
+            
             Text(title.title)
                 .font(.subheadline)
                 .fontWeight(.medium)
