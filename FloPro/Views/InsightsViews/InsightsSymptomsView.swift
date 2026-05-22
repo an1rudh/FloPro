@@ -19,7 +19,7 @@ struct InsightsSymptomsView: View {
                     InsightRow(
                         title: symptom.title,
                         detail: "\(count) logs",
-                        tint: Color(hex: 0xF2A4B8)
+                        tint: symptom.tint
                     )
                 },
                 emptyMessage:
