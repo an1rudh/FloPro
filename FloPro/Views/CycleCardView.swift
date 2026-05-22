@@ -27,7 +27,7 @@ struct CycleCardView: View {
                 }
 
                 NavigationLink {
-                    CalendarView(quickLog: .constant(true))
+                    CalendarView(quickLog: true)
                 } label : {
                     Text("Log Your Period")
                         .font(.system(size: 20, weight: .bold, design: .rounded))

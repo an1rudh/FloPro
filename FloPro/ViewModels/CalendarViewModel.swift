@@ -44,7 +44,7 @@ class CalendarViewModel {
         )!
     }
 
-    func calendarDayCells() -> [CalendarDayCell?] {
+    func calendarDayCells() -> [LocalDay?] {
         let monthComponents = calendar.dateComponents(
             [.year, .month],
             from: currentMonth
@@ -63,7 +63,7 @@ class CalendarViewModel {
         let weekday = calendar.component(.weekday, from: firstDayOfMonth)
         let leadingEmptyDays = (weekday + 5) % 7
 
-        var cells: [CalendarDayCell?] = Array(
+        var cells: [LocalDay?] = Array(
             repeating: nil,
             count: leadingEmptyDays
         )
@@ -81,12 +81,7 @@ class CalendarViewModel {
             )
 
             cells.append(
-                CalendarDayCell(
-                    date: date,
-                    day: localDay,
-                    dayNumber: day,
-                    isInCurrentMonth: true
-                )
+                localDay
             )
         }
 
@@ -107,7 +102,7 @@ class CalendarViewModel {
         if isInFertileWindow(for: day) {
             return CalendarItems.LegendItemTitle.fertileWindow.color
         }
-        return .clear
+        return .white
     }
 
     func isToday(_ day: LocalDay) -> Bool {

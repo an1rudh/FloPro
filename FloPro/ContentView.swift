@@ -20,7 +20,7 @@ struct ContentView: View {
                         HomeScreenView()
                     }
                     Tab("Calendar", systemImage: "calendar") {
-                        CalendarView(quickLog: .constant(false))
+                        CalendarView(quickLog: false)
                     }
                     Tab("Insights", systemImage: "chart.bar") {
                         InsightsView()

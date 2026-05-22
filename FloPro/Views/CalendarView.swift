@@ -11,92 +11,24 @@ struct CalendarView: View {
     @Environment(LogPeriodStore.self) private var logPeriodStore
     @Environment(UserStore.self) private var userStore
     @State private var calendarViewModel = CalendarViewModel()
-    @State private var calendarItems = CalendarItems()
-    @Binding var quickLog: Bool
+    var quickLog: Bool
+    
     var body: some View {
         ZStack {
             BackdropView()
-            ScrollView {
-                VStack {
-                    ZStack {
-                        if quickLog {
-                            HStack {
-                                BackButtonView()
-                                Spacer()
-                            }
-                        }
-                        HStack {
-                            Button {
-                                calendarViewModel.changeMonth(by: -1)
-                            } label: {
-                                Image(systemName: "chevron.left").font(.title2)
-                                    .foregroundColor(.black)
-                            }
-                            Text(calendarViewModel.currentMonth.formatted(.dateTime.month(.abbreviated).year()))
-                                .font(.title).fontWeight(.bold).padding(
-                                    .horizontal,
-                                    2
-                                )
-                            Button {
-                                calendarViewModel.changeMonth(by: 1)
-                            } label: {
-                                Image(systemName: "chevron.right").font(.title2)
-                                    .foregroundColor(.black)
-                            }
-                            
-                        }
-                    }
-                    LazyVGrid(
-                        columns: calendarViewModel.columns,
-                        spacing: 12
-                    ) {
-                        ForEach(
-                            calendarViewModel.weekDays.enumerated(),
-                            id: \.offset
-                        ) { index, day in
-                            Text(day).fontWeight(.bold).font(.title2)
-                        }
-                    }
-                    LazyVGrid(
-                        columns: calendarViewModel.columns,
-                        spacing: 12
-                    ) {
-                        ForEach(
-                            Array(
-                                calendarViewModel.calendarDayCells()
-                                    .enumerated()
-                            ),
-                            id: \.offset
-                        ) {
-                            _,
-                            calDayCell in
-                            if calDayCell == nil {
-                                Color.clear.frame(width: 36, height: 36)
-                            } else {
-                                if quickLog {
-                                    Button {
-                                        logPeriodStore.logPeriod(for: calDayCell!.day)
-                                        syncCalendarState()
-                                    } label: {
-                                        dayCellLabel(for: calDayCell!.dayNumber, of: calDayCell!.day)
-                                    }
-                                } else {
-                                    
-                                    NavigationLink {
-                                        SymptomLogView(day: calDayCell!.day)
-                                    } label: {
-                                        dayCellLabel(for: calDayCell!.dayNumber, of: calDayCell!.day)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    calendarLegend
-                        .padding(.vertical, 20)
-                }.padding()
-                
-            }
+            VStack {
+                ZStack {
+                    backButton
+                    calendarHeader
+                }
+                weekRow
+                calendarCells
+                calendarLegend
+                    .padding(.vertical)
+                Spacer()
+            }.padding()
+            
+            
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
@@ -114,6 +46,75 @@ struct CalendarView: View {
         )
     }
     
+    @ViewBuilder
+    private var calendarHeader: some View {
+        HStack {
+            Button {
+                calendarViewModel.changeMonth(by: -1)
+            } label: {
+                Image(systemName: "chevron.left").font(.title2)
+                    .foregroundColor(.black)
+            }
+            Text(calendarViewModel.currentMonth.formatted(.dateTime.month(.abbreviated).year()))
+                .font(.title).fontWeight(.bold).padding(
+                    .horizontal,
+                    2
+                )
+            Button {
+                calendarViewModel.changeMonth(by: 1)
+            } label: {
+                Image(systemName: "chevron.right").font(.title2)
+                    .foregroundColor(.black)
+            }
+            
+        }
+    }
+    
+    @ViewBuilder
+    private var backButton: some View {
+        if quickLog {
+            HStack {
+                BackButtonView()
+                Spacer()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var weekRow: some View {
+        LazyVGrid(
+            columns: calendarViewModel.columns,
+            spacing: 12
+        ) {
+            ForEach(
+                calendarViewModel.weekDays.enumerated(),
+                id: \.offset
+            ) { index, day in
+                Text(day).fontWeight(.bold).font(.title2)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var calendarCells: some View {
+        LazyVGrid(
+            columns: calendarViewModel.columns,
+            spacing: 12
+        ) {
+            ForEach(
+                Array(calendarViewModel.calendarDayCells().enumerated()),
+                id: \.offset
+            ) { _, day in
+                if let day {
+                    calendarDayButton(for: day)
+                } else {
+                    Color.clear.frame(width: 36, height: 36)
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
     private var calendarLegend: some View {
         LazyVGrid(
             columns: [GridItem(.adaptive(minimum: 120), alignment: .leading)],
@@ -129,13 +130,37 @@ struct CalendarView: View {
     }
     
     @ViewBuilder
-    private func dayCellLabel(for dayNumber: Int, of day: LocalDay) -> some View {
-        Text("\(dayNumber)")
+    private func calendarDayButton(for day: LocalDay) -> some View {
+        if quickLog {
+            Button {
+                logPeriodStore.logPeriod(for: day)
+                syncCalendarState()
+            } label: {
+                dayCellLabel(of: day)
+            }
+        } else {
+            NavigationLink {
+                SymptomLogView(day: day)
+            } label: {
+                dayCellLabel(of: day)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func dayCellLabel(of day: LocalDay) -> some View {
+        Text("\(day.day)")
             .fontWeight(.semibold)
             .frame(width: 45, height: 45)
             .foregroundColor(.gray)
             .background(calendarViewModel.getBackgroundColor(for: day))
             .clipShape(.circle)
+            .shadow(
+                color: .black.opacity(0.06),
+                radius: 6,
+                x: 0,
+                y: 2
+            )
             .overlay {
                 if calendarViewModel.isToday(day) {
                     Circle().stroke(
@@ -158,6 +183,20 @@ struct CalendarView: View {
                     .offset(x: 2, y: -0.5)
                 }
             }
+            .overlay(alignment: .bottom) {
+                if logPeriodStore.record(for: day)?.symptoms != nil && logPeriodStore.record(for: day)?.mood != nil {
+                    Image(
+                        systemName: CalendarItems.LegendItemTitle.symptomsLogged
+                            .symbol ?? ""
+                    )
+                    .font(.system(size: 6, weight: .medium))
+                    .foregroundStyle(
+                        CalendarItems.LegendItemTitle.symptomsLogged.symbolColor
+                        ?? .primary
+                    )
+                    .offset(x: 0, y: -5)
+                }
+            }
         
     }
     
@@ -166,9 +205,10 @@ struct CalendarView: View {
         HStack(alignment: .center) {
             Group {
                 if let symbol = title.symbol {
+                    let size = title == CalendarItems.LegendItemTitle.symptomsLogged ? 8 : 14
                     let symbolColor = title.symbolColor!
                     Image(systemName: symbol)
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: CGFloat(size), weight: .bold))
                         .foregroundStyle(symbolColor)
                         .frame(width: 20, height: 20)
                 } else {
@@ -197,7 +237,7 @@ struct CalendarView: View {
 }
 
 #Preview {
-    CalendarView(quickLog: .constant(false))
+    CalendarView(quickLog: false)
         .environment(UserStore())
         .environment(LogPeriodStore())
 }
