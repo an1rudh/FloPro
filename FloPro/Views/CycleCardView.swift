@@ -25,7 +25,6 @@ struct CycleCardView: View {
                 } else {
                     emptyStateContent
                 }
-
                 NavigationLink {
                     CalendarView(quickLog: true)
                 } label : {

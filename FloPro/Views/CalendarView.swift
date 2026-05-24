@@ -11,7 +11,13 @@ struct CalendarView: View {
     @Environment(LogPeriodStore.self) private var logPeriodStore
     @Environment(UserStore.self) private var userStore
     @State private var calendarViewModel = CalendarViewModel()
+    @Namespace private var legendAnimation
     var quickLog: Bool
+    
+    init(quickLog: Bool) {
+        self.quickLog = quickLog
+        calendarViewModel.generateMonths()
+    }
     
     var body: some View {
         ZStack {
@@ -19,18 +25,30 @@ struct CalendarView: View {
             VStack {
                 ZStack {
                     backButton
-                    calendarHeader
+                    calendarTitle
                 }
-                weekRow
-                calendarCells
-                calendarLegend
-                    .padding(.vertical)
-                Spacer()
-            }.padding()
-            
-            
+                Divider()
+                ZStack(alignment: .bottomTrailing) {
+                    calendarContainer
+                        .simultaneousGesture(
+                            TapGesture().onEnded {
+                                if !calendarViewModel.isLegendCollapsed {
+                                    withAnimation(
+                                        .spring(response: 0.35, dampingFraction: 0.82)
+                                    ) {
+                                        calendarViewModel.isLegendCollapsed = true
+                                    }
+                                }
+                            }
+                        )
+                    floatingLegend
+                        .padding(.trailing)
+                        .padding(.bottom)
+                }
+            }
+            .padding(.horizontal)
         }
-        .navigationBarBackButtonHidden(true)
+        .navigationBarBackButtonHidden()
         .onAppear {
             syncCalendarState()
         }
@@ -47,26 +65,109 @@ struct CalendarView: View {
     }
     
     @ViewBuilder
-    private var calendarHeader: some View {
-        HStack {
-            Button {
-                calendarViewModel.changeMonth(by: -1)
-            } label: {
-                Image(systemName: "chevron.left").font(.title2)
-                    .foregroundColor(.black)
+    private var floatingLegend: some View {
+        Button {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+                calendarViewModel.isLegendCollapsed.toggle()
             }
-            Text(calendarViewModel.currentMonth.formatted(.dateTime.month(.abbreviated).year()))
-                .font(.title).fontWeight(.bold).padding(
-                    .horizontal,
-                    2
+        } label: {
+            ZStack {
+                calendarLegend
+                    .opacity(
+                        calendarViewModel.isLegendCollapsed ? 0 : 1
+                    )
+                Image(systemName: "info.circle")
+                    .font(.title)
+                    .foregroundStyle(.black)
+                    .opacity(
+                        calendarViewModel.isLegendCollapsed ? 1 : 0
+                    )
+            }
+            .padding(calendarViewModel.isLegendCollapsed ? 0 : 16)
+            .frame(
+                width: calendarViewModel.isLegendCollapsed ? 70 : 260,
+                height: calendarViewModel.isLegendCollapsed ? 70 : nil
+            )
+            .background(
+                calendarViewModel.isLegendCollapsed
+                    ? AnyShapeStyle(Color.white)
+                : AnyShapeStyle(.ultraThickMaterial)
+            )
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: calendarViewModel.isLegendCollapsed ? 70 : 20
                 )
-            Button {
-                calendarViewModel.changeMonth(by: 1)
-            } label: {
-                Image(systemName: "chevron.right").font(.title2)
-                    .foregroundColor(.black)
+            )
+            .shadow(radius: 8)
+        }
+    }
+    
+    @ViewBuilder
+    private var calendarContainer: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(
+                        calendarViewModel.monthArray,
+                        id: \.self
+                    ) { month in
+                        VStack(spacing: 0) {
+                            Color.clear
+                                .background {
+                                    GeometryReader { geo in
+                                        Color.clear.preference(
+                                            key: ScrollOffsetPreferenceKey.self,
+                                            value: geo.frame(in: .global).minY
+                                        )
+                                    }
+                                }
+                            calendarHeader(month: month)
+                                .padding(.bottom)
+                            weekRow
+                            calendarCells(month: month)
+                            Divider()
+                                .padding(.vertical)
+                        }
+                        .id(month)
+                    }
+                }
             }
-            
+            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { offset in
+                calendarViewModel.handleScroll(offset)
+            }
+            .scrollIndicators(.hidden)
+            .onAppear {
+                DispatchQueue.main.async {
+                    proxy.scrollTo(
+                        calendarViewModel.currentMonth,
+                        anchor: .top
+                    )
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var calendarTitle: some View {
+        HStack {
+            Spacer()
+            Text("Calendar").font(.title2).fontWeight(.bold)
+            Spacer()
+        }
+    }
+    
+    @ViewBuilder
+    private func calendarHeader(month: Date) -> some View {
+        HStack {
+            if month == calendarViewModel.currentMonth {
+                Image(systemName: "calendar").font(.title3).foregroundStyle(.red)
+            }
+            Text(month.formatted(.dateTime.month(.abbreviated).year()))
+                .font(.title3).fontWeight(.bold)
+                .padding(.horizontal, 4)
+            Spacer()
+        }.onAppear {
+            calendarViewModel.onScroll(to: month)
         }
     }
     
@@ -90,19 +191,20 @@ struct CalendarView: View {
                 calendarViewModel.weekDays.enumerated(),
                 id: \.offset
             ) { index, day in
-                Text(day).fontWeight(.bold).font(.title2)
+                Text(day).fontWeight(.semibold)
             }
         }
     }
     
+    
     @ViewBuilder
-    private var calendarCells: some View {
+    private func calendarCells(month: Date) -> some View {
         LazyVGrid(
             columns: calendarViewModel.columns,
             spacing: 12
         ) {
             ForEach(
-                Array(calendarViewModel.calendarDayCells().enumerated()),
+                Array(calendarViewModel.calendarDayCells(for: month).enumerated()),
                 id: \.offset
             ) { _, day in
                 if let day {
@@ -131,26 +233,27 @@ struct CalendarView: View {
     
     @ViewBuilder
     private func calendarDayButton(for day: LocalDay) -> some View {
-        if quickLog {
-            Button {
-                logPeriodStore.logPeriod(for: day)
-                syncCalendarState()
-            } label: {
-                dayCellLabel(of: day)
+        Group {
+            if quickLog {
+                Button {
+                    logPeriodStore.logPeriod(for: day)
+                    syncCalendarState()
+                } label: {
+                    dayCellLabel(of: day)
+                }
+            } else {
+                NavigationLink {
+                    SymptomLogView(day: day)
+                } label: {
+                    dayCellLabel(of: day)
+                }
             }
-        } else {
-            NavigationLink {
-                SymptomLogView(day: day)
-            } label: {
-                dayCellLabel(of: day)
-            }
-        }
+        }.allowsHitTesting(calendarViewModel.isLegendCollapsed)
     }
     
     @ViewBuilder
     private func dayCellLabel(of day: LocalDay) -> some View {
         Text("\(day.day)")
-            .fontWeight(.semibold)
             .frame(width: 45, height: 45)
             .foregroundColor(.gray)
             .background(calendarViewModel.getBackgroundColor(for: day))
@@ -237,7 +340,7 @@ struct CalendarView: View {
 }
 
 #Preview {
-    CalendarView(quickLog: false)
+    CalendarView(quickLog: true)
         .environment(UserStore())
         .environment(LogPeriodStore())
 }

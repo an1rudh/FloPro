@@ -11,15 +11,21 @@ import SwiftUI
 
 @Observable
 class CalendarViewModel {
-    var currentMonth: Date
     private(set) var loggedDays: [LocalDay: DayRecord] = [:]
     private(set) var cyclePrediction: CyclePrediction = .empty
+    private let cyclePredictionService: CyclePredictionService
+    private let calendar: Calendar
 
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
     let weekDays = ["M", "T", "W", "T", "F", "S", "S"]
     let today: LocalDay
-    private let cyclePredictionService: CyclePredictionService
-    private let calendar: Calendar
+    var monthArray: [Date] = []
+    var monthOffsets: [Int] = []
+    var currentMonth: Date
+    var isPrepending = false
+    
+    var isLegendCollapsed = false
+    private var initialOffset: CGFloat?
 
     init(
         cyclePredictionService: CyclePredictionService = CyclePredictionService()
@@ -35,6 +41,70 @@ class CalendarViewModel {
             day: calendar.component(.day, from: Date())
         )
     }
+    
+    func handleScroll(_ offset: CGFloat) {
+        if initialOffset == nil {
+            initialOffset = offset
+        }
+
+        guard let initialOffset else { return }
+
+        let scrollDistance = initialOffset - offset
+
+        withAnimation(.spring(duration: 0.3)) {
+            isLegendCollapsed = scrollDistance > 50
+        }
+    }
+    
+    func generateMonths() {
+        monthArray = (-10...10).map { offset in
+            getMonths(by: offset)
+        }
+        monthOffsets = (-10...10).map { offset in
+            offset
+        }
+    }
+    
+    func onScroll(to month: Date) {
+        guard let index = monthArray.firstIndex(of: month) else { return }
+        if index < 3 && !isPrepending {
+            prependMonths()
+        } else if index >= monthArray.count - 3 {
+            appendMonths()
+        }
+    }
+    
+    func reduceCalendarInMemory(fromEnd: Bool) {
+        if monthArray.count > 50 {
+            if fromEnd {
+                monthArray = Array(monthArray[monthArray.count - 50...monthArray.count - 1])
+            } else {
+                monthArray = Array(monthArray[0...50])
+            }
+        }
+    }
+    
+    func appendMonths() {
+        let lastOffset = monthOffsets.last!
+        for i in 1...5 {
+            monthOffsets.append(lastOffset + i)
+            monthArray.append(getMonths(by: lastOffset + i))
+        }
+        reduceCalendarInMemory(fromEnd: false)
+    }
+    
+    func prependMonths() {
+        isPrepending = true
+        let firstOffset = monthOffsets.first!
+        for i in 1...5 {
+            monthOffsets.insert(firstOffset - i, at: 0)
+            monthArray.insert(getMonths(by: firstOffset - i), at: 0)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            self.isPrepending = false
+        }
+        reduceCalendarInMemory(fromEnd: true)
+    }
 
     func changeMonth(by value: Int) {
         currentMonth = calendar.date(
@@ -43,11 +113,19 @@ class CalendarViewModel {
             to: currentMonth
         )!
     }
+    
+    func getMonths(by value: Int) -> Date {
+        calendar.date(
+            byAdding: .month,
+            value: value,
+            to: currentMonth
+        )!
+    }
 
-    func calendarDayCells() -> [LocalDay?] {
+    func calendarDayCells(for month: Date?) -> [LocalDay?] {
         let monthComponents = calendar.dateComponents(
             [.year, .month],
-            from: currentMonth
+            from: month ?? currentMonth
         )
         guard
             let firstDayOfMonth = calendar.date(from: monthComponents),
@@ -138,5 +216,16 @@ class CalendarViewModel {
             defaultCycleLength: defaultCycleLength,
             defaultPeriodLength: defaultPeriodLength
         )
+    }
+}
+
+struct ScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = .infinity
+
+    static func reduce(
+        value: inout CGFloat,
+        nextValue: () -> CGFloat
+    ) {
+        value = min(value, nextValue())
     }
 }
