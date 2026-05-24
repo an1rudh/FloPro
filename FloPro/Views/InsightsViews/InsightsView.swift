@@ -59,14 +59,13 @@ struct InsightsView: View {
                                 : Color(hex: 0x70738A)
                         )
                         .lineLimit(1)
-                        .frame(height: 38)
-                        .padding(.horizontal, 10)
+                        .frame(width: 85, height: 38)
                         .background(
-                            Capsule(style: .continuous)
+                            Capsule(style: .circular)
                                 .fill(
                                     selectedSection == section
                                         ? Color(hex: 0xEEE7FF)
-                                        : Color.white.opacity(0.72)
+                                        : Color.white
                                 )
                         )
                 }

@@ -13,15 +13,13 @@ struct HomeScreenView: View {
         ZStack {
             BackdropView()
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .center, spacing: 18) {
                     header
                     CycleCardView()
                     MoodCardView()
                     InsightsCardView()
                 }
-                .padding(.horizontal, 22)
-                .padding(.top, 16)
-                .padding(.bottom, 32)
+                .padding(.horizontal)
             }
         }
 
@@ -34,7 +32,6 @@ struct HomeScreenView: View {
                 .foregroundStyle(Color(hex: 0x202342))
             Spacer()
         }
-        .padding(.top, 4)
     }
 }
 

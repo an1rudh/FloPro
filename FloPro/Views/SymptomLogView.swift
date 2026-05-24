@@ -34,9 +34,7 @@ struct SymptomLogView: View {
                     moodSection(title: "Emotional", items: logSymptomService.moods)
                     saveButton
                 }
-                .padding(.horizontal, 24)
-                .padding(.top, 20)
-                .padding(.bottom, 32)
+                .padding(.horizontal)
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -50,13 +48,8 @@ struct SymptomLogView: View {
             HStack {
                 BackButtonView()
                 Spacer()
-
-                Text("Symptoms")
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundStyle(Color(hex: 0x3F3955))
-
+                Text("Symptoms").font(.system(size: 28, weight: .bold, design: .rounded))
                 Spacer()
-
                 Color.clear
                     .frame(width: 36, height: 36)
             }
