@@ -17,11 +17,13 @@ struct SymptomLogView: View {
     private let logSymptomService: LogSymptomService
     private let date: Date
     private let day: LocalDay
+    private let calendar: Calendar
 
     init(date: Date = .now, logSymptomService: LogSymptomService = LogSymptomService(), day: LocalDay) {
         self.date = date
         self.logSymptomService = logSymptomService
         self.day = day
+        self.calendar = .current
     }
 
     var body: some View {
@@ -55,7 +57,7 @@ struct SymptomLogView: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Log for \(date.formatted(date: .complete, time: .omitted))")
+                Text("Log for \(formatted(day: day))")
                     .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(Color(hex: 0x625D78))
 
@@ -64,6 +66,14 @@ struct SymptomLogView: View {
                     .foregroundStyle(.secondary)
             }
         }
+    }
+    
+    private func formatted(day: LocalDay) -> String {
+        guard let date = day.date(in: calendar) else {
+            return "--"
+        }
+        
+        return date.formatted(.dateTime.month(.wide).day().year())
     }
 
     private func symptomSection(title: String, items: [SymptomItem]) -> some View {
