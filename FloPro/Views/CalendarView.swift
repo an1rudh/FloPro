@@ -27,7 +27,6 @@ struct CalendarView: View {
                     backButton
                     calendarTitle
                 }
-                Divider()
                 ZStack(alignment: .bottomTrailing) {
                     calendarContainer
                         .simultaneousGesture(
@@ -151,7 +150,7 @@ struct CalendarView: View {
     private var calendarTitle: some View {
         HStack {
             Spacer()
-            Text("Calendar").font(.title2).fontWeight(.bold)
+            Text("Calendar").font(.system(size: 28, weight: .bold, design: .rounded))
             Spacer()
         }
     }

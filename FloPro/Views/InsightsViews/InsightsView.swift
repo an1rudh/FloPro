@@ -30,7 +30,7 @@ struct InsightsView: View {
                         InsightsSleepView()
                     }
                 }
-                .padding(.all)
+                .padding(.horizontal)
             }
         }
     }
@@ -39,10 +39,9 @@ struct InsightsView: View {
         HStack {
             Spacer()
             Text("Insights")
-                .font(.system(size: 28, weight: .bold))
+                .font(.system(size: 28, weight: .bold, design: .rounded))
             Spacer()
         }
-        .padding(.top, 4)
     }
 
     private var sectionPicker: some View {
