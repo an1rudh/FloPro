@@ -11,7 +11,7 @@ import SwiftUI
 struct FloProApp: App {
     @State private var userStore = UserStore()
     @State private var periodLogStore = LogPeriodStore()
-
+    
     var body: some Scene {
         WindowGroup {
             ContentView()

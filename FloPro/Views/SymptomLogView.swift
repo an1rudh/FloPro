@@ -18,6 +18,15 @@ struct SymptomLogView: View {
     private let date: Date
     private let day: LocalDay
     private let calendar: Calendar
+    private let physicalSymptoms: [SymptomItem]  =
+    Symptom.allCases.map {
+        .init(symptom: $0)
+    }
+    private let moods: [MoodItem] =
+    Mood.allCases.map {
+        .init(mood: $0)
+    }
+    
 
     init(date: Date = .now, logSymptomService: LogSymptomService = LogSymptomService(), day: LocalDay) {
         self.date = date
@@ -27,44 +36,43 @@ struct SymptomLogView: View {
     }
 
     var body: some View {
-        ZStack {
-            BackdropView()
+        BackdropContainer {
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 28) {
-                    headerView
-                    symptomSection(title: "Physical", items: logSymptomService.physicalSymptoms)
-                    moodSection(title: "Emotional", items: logSymptomService.moods)
+                VStack(alignment: .leading, spacing: 20) {
+                    subHeading
+                    symptomSection
+                    moodSection
                     saveButton
                 }
                 .padding(.horizontal)
+                .padding(.vertical, 20)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         }
-        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                header
+            }
+        }
+        .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             loadDraft()
         }
     }
 
-    private var headerView: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            HStack {
-                BackButtonView()
-                Spacer()
-                Text("Symptoms").font(.system(size: 28, weight: .bold, design: .rounded))
-                Spacer()
-                Color.clear
-                    .frame(width: 36, height: 36)
-            }
+    private var header: some View {
+        Text("Symptoms").font(.system(size: 28, weight: .bold, design: .rounded))
+    }
+    
+    private var subHeading: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Log for \(formatted(day: day))")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundStyle(Color(hex: 0x625D78))
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Log for \(formatted(day: day))")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(Color(hex: 0x625D78))
-
-                Text("Choose all symptoms that match how you feel today.")
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundStyle(.secondary)
-            }
+            Text("Choose all symptoms that match how you feel today.")
+                .font(.system(size: 14, weight: .regular))
+                .foregroundStyle(.secondary)
         }
     }
     
@@ -76,9 +84,9 @@ struct SymptomLogView: View {
         return date.formatted(.dateTime.month(.wide).day().year())
     }
 
-    private func symptomSection(title: String, items: [SymptomItem]) -> some View {
+    private var symptomSection: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text(title)
+            Text("Physical")
                 .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(Color(hex: 0x3F3955))
 
@@ -86,16 +94,16 @@ struct SymptomLogView: View {
                 columns: Array(repeating: GridItem(.flexible(), spacing: 18), count: 3),
                 spacing: 18
             ) {
-                ForEach(items) { item in
+                ForEach(physicalSymptoms) { item in
                     symptomButton(for: item)
                 }
             }
         }
     }
 
-    private func moodSection(title: String, items: [MoodItem]) -> some View {
+    private var moodSection: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text(title)
+            Text("Emotional")
                 .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(Color(hex: 0x3F3955))
 
@@ -103,7 +111,7 @@ struct SymptomLogView: View {
                 columns: Array(repeating: GridItem(.flexible(), spacing: 18), count: 3),
                 spacing: 18
             ) {
-                ForEach(items) { item in
+                ForEach(moods) { item in
                     moodButton(for: item)
                 }
             }

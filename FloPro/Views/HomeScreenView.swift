@@ -9,9 +9,9 @@ import SwiftUI
 
 struct HomeScreenView: View {
     @Environment(UserStore.self) private var userStore
+
     var body: some View {
-        ZStack {
-            BackdropView()
+        BackdropContainer {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .center, spacing: 18) {
                     header
@@ -22,7 +22,6 @@ struct HomeScreenView: View {
                 .padding(.horizontal)
             }
         }
-
     }
 
     private var header: some View {
@@ -36,7 +35,9 @@ struct HomeScreenView: View {
 }
 
 #Preview {
-    HomeScreenView()
-        .environment(UserStore())
-        .environment(LogPeriodStore())
+    NavigationStack {
+        HomeScreenView()
+            .environment(UserStore())
+            .environment(LogPeriodStore())
+    }
 }

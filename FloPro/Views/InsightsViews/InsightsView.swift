@@ -12,12 +12,9 @@ struct InsightsView: View {
     @State private var selectedSection: InsightSection = .overview
 
     var body: some View {
-        ZStack {
-            BackdropView()
-
+        BackdropContainer {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 20) {
-                    header
                     sectionPicker
                     switch selectedSection {
                     case .overview:
@@ -33,15 +30,17 @@ struct InsightsView: View {
                 .padding(.horizontal)
             }
         }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                header
+            }
+        }
     }
 
     private var header: some View {
-        HStack {
-            Spacer()
             Text("Insights")
                 .font(.system(size: 28, weight: .bold, design: .rounded))
-            Spacer()
-        }
     }
 
     private var sectionPicker: some View {
@@ -78,7 +77,9 @@ struct InsightsView: View {
 
 
 #Preview {
-    InsightsView()
-        .environment(UserStore())
-        .environment(LogPeriodStore())
+    NavigationStack {
+        InsightsView()
+            .environment(UserStore())
+            .environment(LogPeriodStore())
+    }
 }

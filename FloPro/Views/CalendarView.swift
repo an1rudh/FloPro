@@ -20,13 +20,8 @@ struct CalendarView: View {
     }
     
     var body: some View {
-        ZStack {
-            BackdropView()
+        BackdropContainer {
             VStack {
-                ZStack {
-                    backButton
-                    calendarTitle
-                }
                 ZStack(alignment: .bottomTrailing) {
                     calendarContainer
                         .simultaneousGesture(
@@ -47,8 +42,11 @@ struct CalendarView: View {
             }
             .padding(.horizontal)
         }
-        .navigationBarBackButtonHidden()
-        .onAppear {
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                header
+            }
+        }        .onAppear {
             syncCalendarState()
         }
         .onChange(of: logPeriodStore.loggedDays) {
@@ -89,7 +87,7 @@ struct CalendarView: View {
             )
             .background(
                 calendarViewModel.isLegendCollapsed
-                    ? AnyShapeStyle(Color.white)
+                ? AnyShapeStyle(Color.white)
                 : AnyShapeStyle(.ultraThickMaterial)
             )
             .clipShape(
@@ -147,12 +145,9 @@ struct CalendarView: View {
     }
     
     @ViewBuilder
-    private var calendarTitle: some View {
-        HStack {
-            Spacer()
-            Text("Calendar").font(.system(size: 28, weight: .bold, design: .rounded))
-            Spacer()
-        }
+    private var header: some View {
+        Text("Calendar").font(.system(size: 28, weight: .bold, design: .rounded))
+        
     }
     
     @ViewBuilder
@@ -167,16 +162,6 @@ struct CalendarView: View {
             Spacer()
         }.onAppear {
             calendarViewModel.onScroll(to: month)
-        }
-    }
-    
-    @ViewBuilder
-    private var backButton: some View {
-        if quickLog {
-            HStack {
-                BackButtonView()
-                Spacer()
-            }
         }
     }
     
@@ -339,7 +324,9 @@ struct CalendarView: View {
 }
 
 #Preview {
-    CalendarView(quickLog: true)
-        .environment(UserStore())
-        .environment(LogPeriodStore())
+    NavigationStack {
+        CalendarView(quickLog: true)
+            .environment(UserStore())
+            .environment(LogPeriodStore())
+    }
 }

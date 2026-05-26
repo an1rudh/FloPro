@@ -14,18 +14,6 @@ struct LogSymptomService {
         self.logPeriodService = logPeriodService
     }
     
-    var physicalSymptoms: [SymptomItem] {
-        Symptom.allCases.map {
-            SymptomItem(symptom: $0)
-        }
-    }
-
-    var moods: [MoodItem] {
-        Mood.allCases.map {
-            MoodItem(mood: $0)
-        }
-    }
-    
     func logSymptoms(
         symptoms: Set<Symptom>?,
         mood: Mood?,

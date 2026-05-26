@@ -9,23 +9,30 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(UserStore.self) private var userStore
-
+    
     var body: some View {
-        if userStore.userData?.isUserOnboarded == false || userStore.userData?.isUserOnboarded == nil {
+        if userStore.userData?.isUserOnboarded == false ||
+            userStore.userData?.isUserOnboarded == nil {
             OnboardingView()
         } else {
-            NavigationStack {
-                TabView {
-                    Tab("Today", systemImage: "house") {
+            TabView {
+                Tab("Today", systemImage: "house") {
+                    NavigationStack {
                         HomeScreenView()
                     }
-                    Tab("Calendar", systemImage: "calendar") {
+                }
+                Tab("Calendar", systemImage: "calendar") {
+                    NavigationStack {
                         CalendarView(quickLog: false)
                     }
-                    Tab("Insights", systemImage: "chart.bar") {
+                }
+                Tab("Insights", systemImage: "chart.bar") {
+                    NavigationStack {
                         InsightsView()
                     }
-                    Tab("Profile", systemImage: "person.fill") {
+                }
+                Tab("Profile", systemImage: "person.fill") {
+                    NavigationStack {
                         ProfileView()
                     }
                 }

@@ -21,8 +21,7 @@ struct OnboardingView: View {
     private let periodLengthOptions = Array(2...10)
 
     var body: some View {
-        ZStack {
-            BackdropView()
+        BackdropContainer {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 28) {
                     headerSection
@@ -31,9 +30,7 @@ struct OnboardingView: View {
                     goalSection
                     continueButton
                 }
-                .padding(.horizontal, 28)
-                .padding(.top, 52)
-                .padding(.bottom, 24)
+                .padding(.horizontal)
             }
         }
     }
@@ -202,6 +199,8 @@ struct OnboardingView: View {
 }
 
 #Preview {
-    OnboardingView()
-        .environment(UserStore())
+    NavigationStack {
+        OnboardingView()
+            .environment(UserStore())
+    }
 }
