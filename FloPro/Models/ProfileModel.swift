@@ -336,3 +336,38 @@ struct CommunityMenuItemStruct: Identifiable, Equatable {
     }
     var id: CommunityMenuItem { type }
 }
+
+enum DocumentationItem: CaseIterable {
+    case whats_new
+    case terms_of_service
+    case privacy_policy
+    case licenses
+    var title: String {
+        switch self {
+        case .whats_new: return "What's New"
+        case .terms_of_service: return "Terms of Service"
+        case .privacy_policy: return "Privacy Policy"
+        case .licenses: return "Licenses"
+        }
+    }
+    var icon: String {
+        switch self {
+        case .whats_new: return "info.circle"
+        case .terms_of_service: return "doc"
+        case .privacy_policy: return "doc"
+        case .licenses: return "doc"
+        }
+    }
+}
+
+struct DocumentationItemStruct: Identifiable, Equatable {
+    let type: DocumentationItem
+    let title: String
+    let icon: String
+    init(type: DocumentationItem) {
+        self.type = type
+        self.title = type.title
+        self.icon = type.icon
+    }
+    var id: DocumentationItem { type }
+}

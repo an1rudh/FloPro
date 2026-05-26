@@ -13,13 +13,14 @@ struct HomeScreenView: View {
     var body: some View {
         BackdropContainer {
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .center, spacing: 18) {
+                VStack(alignment: .center, spacing: 20) {
                     header
                     CycleCardView()
                     MoodCardView()
                     InsightsCardView()
                 }
                 .padding(.horizontal)
+                .padding(.vertical, 20)
             }
         }
     }
