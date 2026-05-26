@@ -128,7 +128,7 @@ struct ExportDataView: View {
                                 : .gray.opacity(0.7)
                             )
                         }.padding()
-                        if index < exportFormatMenu.count - 1 {
+                        if index < IncludeDataItem.allCases.count - 1 {
                             Divider()
                         }
                     }
