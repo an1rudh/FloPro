@@ -26,7 +26,7 @@ struct InsightsOverviewView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 20) {
             overviewCard
             ArticleCardView(items: overviewArticles)
         }
@@ -61,13 +61,13 @@ struct InsightsOverviewView: View {
         let summary = insightSummary
         
         return CardView {
-            VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Cycle overview")
-                        .font(.system(size: 24, weight: .bold))
-                    
+                        .font(AppTypographies.title)
                     Text(calendarLabel)
-                        .font(.system(size: 16, weight: .medium))
+                        .font(AppTypographies.body)
+                        .foregroundStyle(AppColors.secondaryText)
                 }
                 
                 HStack(spacing: 0) {
@@ -79,6 +79,7 @@ struct InsightsOverviewView: View {
                     Divider()
                         .frame(height: 64)
                         .padding(.horizontal, 18)
+                        .foregroundStyle(AppColors.border)
                     
                     statColumn(
                         value: "\(summary.averagePeriodLength)",
@@ -95,14 +96,8 @@ struct InsightsOverviewView: View {
                 if let currentCycleDay = summary.currentCycleDay {
                     HStack {
                         Text("Day \(currentCycleDay) of your cycle")
-                            .font(
-                                .system(
-                                    size: 16,
-                                    weight: .semibold,
-                                    design: .rounded
-                                )
-                            )
-                            .foregroundStyle(Color(hex: 0x3A3D58))
+                            .font(AppTypographies.body)
+                            .foregroundStyle(AppColors.primaryText)
                         Spacer()
                         if let nextPeriodStart = summary
                             .nextPredictedPeriodStart
@@ -110,19 +105,13 @@ struct InsightsOverviewView: View {
                             Text(
                                 "Next period \(formatted(day: nextPeriodStart))"
                             )
-                            .font(
-                                .system(
-                                    size: 14,
-                                    weight: .medium,
-                                    design: .rounded
-                                )
-                            )
-                            .foregroundStyle(Color(hex: 0x8B7AAE))
+                            .font(AppTypographies.body)
+                            .foregroundStyle(AppColors.secondaryText)
                         }
                     }
                 }
             }
-            .padding(22)
+            .padding()
         }
     }
     
@@ -152,12 +141,12 @@ struct InsightsOverviewView: View {
     private func statColumn(value: String, title: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(value)
-                .font(.system(size: 46, weight: .bold, design: .rounded))
-                .foregroundStyle(Color(hex: 0x202342))
+                .font(AppTypographies.largeTitle)
+                .foregroundStyle(AppColors.primaryText)
             
             Text(title)
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                .foregroundStyle(Color(hex: 0x70738A))
+                .font(AppTypographies.body)
+                .foregroundStyle(AppColors.primaryText)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

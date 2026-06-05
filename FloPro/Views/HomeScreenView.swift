@@ -13,25 +13,26 @@ struct HomeScreenView: View {
     var body: some View {
         BackdropContainer {
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .center, spacing: 20) {
+                VStack(spacing: 20) {
                     header
                     CycleCardView()
                     MoodCardView()
                     InsightsCardView()
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 20)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .padding()
             }
         }
     }
 
     private var header: some View {
         HStack {
-            Text("Good morning, \(userStore.userData?.name ?? "") 🌸")
-                .font(.system(size: 32, weight: .bold, design: .rounded))
-                .foregroundStyle(Color(hex: 0x202342))
+            Text("Hello, \(userStore.userData?.name ?? "") 🌸")
+                .font(AppTypographies.largeTitle)
+                .foregroundStyle(AppColors.primaryText)
             Spacer()
         }
+        .padding(.horizontal)
     }
 }
 

@@ -19,27 +19,120 @@ struct CycleCardView: View {
 
     var body: some View {
         CardView {
-            VStack {
+            VStack(alignment: .center, spacing: 30) {
                 if hasLoggedData {
-                    progressContent
+                    arcContainer
                 } else {
                     emptyStateContent
                 }
-                NavigationLink {
-                    CalendarView(quickLog: true)
-                } label : {
-                    Text("Log Your Period")
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                        .background(Color(hex: 0xEB4E88))
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                }
-                .padding(.horizontal, 24)
+                logButton
             }
             .padding()
         }
+    }
+    
+    private var logButton: some View {
+        NavigationLink {
+            CalendarView(quickLog: true)
+        } label : {
+            Text("Log Your Period")
+                .font(AppTypographies.title2)
+                .foregroundStyle(AppColors.contrastText)
+                .frame(maxWidth: .infinity)
+                .frame(height: 56)
+                .background(
+                    AppColors.tertiaryGradient
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .overlay(
+                    LinearGradient(
+                        colors: [
+                            .white.opacity(0.22),
+                            .clear
+                        ],
+                        startPoint: .top,
+                        endPoint: .center
+                    )
+                )
+        }
+        .padding(.horizontal, 36)
+    }
+    
+    private var arcContainer: some View {
+        ZStack {
+            ZStack {
+                ArcProgressView(progress: 1)
+                    .stroke(
+                        AppColors.border,
+                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                    )
+                
+                ArcProgressView(progress: progress)
+                    .stroke(
+                        AppColors.primaryGradient,
+                        style: StrokeStyle(
+                            lineWidth: 18,
+                            lineCap: .round
+                        )
+                    )
+                    .blur(radius: 12)
+                    .opacity(0.4)
+                
+                ArcProgressView(progress: progress)
+                    .stroke(
+                        AppColors.primaryGradient,
+                        style: StrokeStyle(lineWidth: 14, lineCap: .round)
+                    )
+                
+                ArcProgressView(progress: progress)
+                    .stroke(
+                        LinearGradient(
+                            colors: [
+                                .white.opacity(0.4),
+                                .clear
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        style: StrokeStyle(
+                            lineWidth: 2,
+                            lineCap: .round
+                        )
+                    )
+                    .blur(radius: 2)
+            }
+            .frame(width: 250, height: 250)
+            .padding(.top)
+            cardContent
+        }
+    }
+    
+    private var cardContent: some View {
+        VStack(spacing: 10) {
+            Text("Day \(cycleSummary?.currentCycleDay ?? 0) of \(cycleSummary?.averageCycleLength ?? 0)")
+                .font(AppTypographies.body)
+                .foregroundStyle(AppColors.secondaryText)
+            
+            Text("Follicular")
+                .font(AppTypographies.largeTitle)
+                .foregroundStyle(AppColors.primaryText)
+            
+            
+            Text("Period in \(periodInDays) days")
+                .font(AppTypographies.body)
+                .foregroundStyle(AppColors.secondaryText)
+            
+        }
+    }
+
+    private var emptyStateContent: some View {
+        Text("Start logging your cycle to see progress here")
+            .font(AppTypographies.body)
+            .foregroundStyle(AppColors.primaryText)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .frame(height: 245)
+            .padding(.horizontal, 24)
     }
     
     private var cycleSummary: CycleInsightSummary? {
@@ -68,65 +161,12 @@ struct CycleCardView: View {
         let cycleLength = cycleSummary?.averageCycleLength ?? 28
         return CGFloat(currentCycleDay) / CGFloat(cycleLength)
     }
-
-    private var progressContent: some View {
-        ZStack {
-            ArcProgressView(progress: progress)
-                .stroke(
-                    LinearGradient(
-                        colors: [
-                            Color(hex: 0xF04F90),
-                            Color(hex: 0xEF7AA8),
-                            Color(hex: 0xF7D3DA)
-                        ],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    ),
-                    style: StrokeStyle(lineWidth: 14, lineCap: .round)
-                )
-                .frame(width: 240, height: 145)
-                .padding(.bottom, 100)
-
-            VStack(spacing: 6) {
-                Text("Period in")
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Color(hex: 0x4B4E68))
-
-                Text(String(periodInDays))
-                    .font(.system(size: 66, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color(hex: 0x1A2143))
-
-                Text("days")
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundStyle(Color(hex: 0x4B4E68))
-
-                HStack(spacing: 6) {
-                    Text("Day \(cycleSummary?.currentCycleDay ?? 0) of \(cycleSummary?.averageCycleLength ?? 0)")
-                        .font(.system(size: 22, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Color(hex: 0x4B4E68))
-
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(Color(hex: 0x7A7D93))
-                }
-            }
-            .padding(.top, 42)
-        }
-    }
-
-    private var emptyStateContent: some View {
-        Text("Start logging your cycle to see progress here")
-            .font(.system(size: 22, weight: .semibold, design: .rounded))
-            .foregroundStyle(Color(hex: 0x4B4E68))
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
-            .frame(height: 245)
-            .padding(.horizontal, 24)
-    }
 }
 
 #Preview {
-    CycleCardView()
-        .environment(UserStore())
-        .environment(LogPeriodStore())
+    BackdropContainer {
+        CycleCardView()
+            .environment(UserStore())
+            .environment(LogPeriodStore())
+    }
 }

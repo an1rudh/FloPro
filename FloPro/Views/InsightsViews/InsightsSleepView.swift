@@ -39,19 +39,19 @@ struct InsightsSleepView: View {
             CardView {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Sleep insights")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color(hex: 0x202342))
+                        .font(AppTypographies.title)
+                        .foregroundStyle(AppColors.primaryText)
 
                     Text("Sleep tracking is not connected yet, but you can still use cycle timing to build better evening routines around your luteal phase.")
-                        .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundStyle(Color(hex: 0x70738A))
+                        .font(AppTypographies.body)
+                        .foregroundStyle(AppColors.secondaryText)
 
                     HStack(spacing: 12) {
                         sleepTip(icon: "moon.stars.fill", title: "Wind down earlier")
                         sleepTip(icon: "bed.double.fill", title: "Aim for a steady bedtime")
                     }
                 }
-                .padding(22)
+                .padding()
             }
 
             ArticleCardView(items: sleepArticles)
@@ -61,8 +61,8 @@ struct InsightsSleepView: View {
     private func sleepTip(icon: String, title: String) -> some View {
         HStack(spacing: 10) {
             Image(systemName: icon)
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(Color(hex: 0x7F69C8))
+                .font(AppTypographies.bodyEmphasis)
+                .foregroundStyle(AppColors.primaryText)
                 .frame(width: 36, height: 36)
                 .background(
                     Circle()
@@ -70,8 +70,8 @@ struct InsightsSleepView: View {
                 )
 
             Text(title)
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundStyle(Color(hex: 0x3A3D58))
+                .font(AppTypographies.bodyEmphasis)
+                .foregroundStyle(AppColors.primaryText)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

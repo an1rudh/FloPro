@@ -11,10 +11,10 @@ struct ArcProgressView: Shape {
     let progress: CGFloat
 
     func path(in rect: CGRect) -> Path {
-        let radius = min(rect.width, rect.height * 2) / 2
-        let center = CGPoint(x: rect.midX, y: rect.maxY)
-        let startAngle = Angle.degrees(150)
-        let endAngle = Angle.degrees(400)
+        let radius = min(rect.width, rect.height) / 2
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let startAngle = Angle.degrees(-90)
+        let endAngle = Angle.degrees(270)
         let currentAngle = Angle.degrees(205 + (130 * progress))
 
         var path = Path()
@@ -40,6 +40,6 @@ struct ArcProgressView: Shape {
 
 #Preview {
     ArcProgressView(progress: 0.5)
-        .stroke(.pink, style: StrokeStyle(lineWidth: 10))
-        .frame(width: 240, height: 145)
+        .stroke(AppColors.primaryGradient, style: StrokeStyle(lineWidth: 20, lineCap: .round))
+        .frame(width: 240, height: 240)
 }

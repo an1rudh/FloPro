@@ -15,8 +15,8 @@ struct CycleHistoryChartView: View {
         if entries.isEmpty {
             Spacer()
             Text("Start logging your period to see insights about your cycle")
-                .font(.system(size: 16, weight: .medium, design: .rounded))
-                .foregroundStyle(Color(hex: 0x8B8FA7))
+                .font(AppTypographies.body)
+                .foregroundStyle(AppColors.primaryText)
         } else {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .bottom) {
@@ -32,19 +32,15 @@ struct CycleHistoryChartView: View {
                                 topTrailingRadius: 5,
                                 style: .continuous
                             )
-                            .fill(
+                            .fill(AppColors.tertiaryGradient)
+                            .overlay(
                                 LinearGradient(
-                                    colors: index == displayEntries.count - 1
-                                    ? [
-                                        Color(hex: 0xB39DFF),
-                                        Color(hex: 0x7FA0FF),
-                                    ]
-                                    : [
-                                        Color(hex: 0xE0D2FF),
-                                        Color(hex: 0xC7B5FF),
+                                    colors: [
+                                        .white.opacity(0.22),
+                                        .clear
                                     ],
-                                    startPoint: .bottom,
-                                    endPoint: .top
+                                    startPoint: .top,
+                                    endPoint: .center
                                 )
                             )
                             .frame(
@@ -58,14 +54,8 @@ struct CycleHistoryChartView: View {
                             )
                             
                             Text(label(for: entry.startDay))
-                                .font(
-                                    .system(
-                                        size: 11,
-                                        weight: .semibold,
-                                        design: .rounded
-                                    )
-                                )
-                                .foregroundStyle(Color(hex: 0xAAA6BE))
+                                .font(AppTypographies.button)
+                                .foregroundStyle(AppColors.secondaryText)
                         }
                         .frame(alignment: .bottom)
                     }
@@ -77,8 +67,8 @@ struct CycleHistoryChartView: View {
                     Text(
                         "Log at least two periods to unlock cycle trend history."
                     )
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(Color(hex: 0x8B8FA7))
+                    .font(AppTypographies.button)
+                    .foregroundStyle(AppColors.primaryText)
                 }
             }
             

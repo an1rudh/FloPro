@@ -180,7 +180,7 @@ class CalendarViewModel {
         if isInFertileWindow(for: day) {
             return CalendarItems.LegendItemTitle.fertileWindow.color
         }
-        return .white
+        return AppColors.cardBackground
     }
 
     func isToday(_ day: LocalDay) -> Bool {

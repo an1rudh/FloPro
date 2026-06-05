@@ -42,15 +42,14 @@ struct ProfileView: View {
             VStack(spacing: 8) {
                 HStack {
                     Text("\(userStore.userData?.name ?? "")")
-                        .font(.title)
-                        .fontWeight(.semibold)
-                        .fontDesign(.rounded)
+                        .font(AppTypographies.title)
+                        .foregroundStyle(AppColors.primaryText)
                     Spacer()
                 }
                 HStack {
                     Text("View and edit profile")
-                        .foregroundStyle(.secondary)
-                        .fontDesign(.rounded)
+                        .font(AppTypographies.caption)
+                        .foregroundStyle(AppColors.secondaryText)
                     Spacer()
                 }
             }
@@ -76,15 +75,16 @@ struct ProfileView: View {
                     } label: {
                         HStack(spacing: 16) {
                             Image(systemName: item.icon)
-                                .font(.system(size: 18, weight: .medium))
-                                .foregroundStyle(.gray)
+                                .font(AppTypographies.body)
+                                .foregroundStyle(AppColors.secondaryText)
                                 .frame(width: 24)
                             Text(item.title)
-                                .font(.system(size: 18, weight: .medium))
+                                .font(AppTypographies.body)
+                                .foregroundStyle(AppColors.primaryText)
                             Spacer()
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(.gray)
+                                .font(AppTypographies.caption)
+                                .foregroundStyle(AppColors.secondaryText)
                         }
                         .padding(.horizontal, 20)
                         .frame(height: 64)
@@ -95,6 +95,7 @@ struct ProfileView: View {
                     if index < profileMenuItems.count - 1 {
                         Divider()
                             .padding(.leading, 60)
+                            .foregroundStyle(AppColors.border)
                     }
                 }
             }
@@ -155,6 +156,8 @@ struct ProfileView: View {
 }
 
 #Preview {
-    ProfileView()
-        .environment(UserStore())
+    NavigationStack {
+        ProfileView()
+            .environment(UserStore())
+    }
 }

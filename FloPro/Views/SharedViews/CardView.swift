@@ -9,33 +9,28 @@ import SwiftUI
 
 struct CardView<Content: View>: View {
     let content: Content
-
+    
     init(@ViewBuilder content: () -> Content) {
         self.content = content()
     }
-
+    
     var body: some View {
         content
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(.white)
-                    .shadow(
-                        color: Color.black.opacity(0.05),
-                        radius: 24,
-                        x: 0,
-                        y: 12
-                    )
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .stroke(Color.white.opacity(0.85), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 30, style: .continuous)
+                    .fill(AppColors.cardBackground)
+                    .shadow(color: .black.opacity(0.04), radius: 16, x: 0, y: 6)
+                    .shadow(color: .white.opacity(0.7), radius: 1, x: 0, y: 1)
             )
     }
 }
 
 #Preview {
-    CardView {
-        Text("Test")
+    BackdropContainer {
+        CardView {
+            Text("Test")
+                .padding()
+        }
     }
 }

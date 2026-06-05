@@ -13,7 +13,7 @@ struct AboutView: View {
     }
     var body: some View {
         BackdropContainer {
-            VStack(alignment: .center, spacing: 30) {
+            VStack(alignment: .leading, spacing: 30) {
                 iconSection
                 documentationSection
                 rightsSection

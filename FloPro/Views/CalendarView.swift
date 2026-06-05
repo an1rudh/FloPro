@@ -74,8 +74,8 @@ struct CalendarView: View {
                         calendarViewModel.isLegendCollapsed ? 0 : 1
                     )
                 Image(systemName: "info.circle")
-                    .font(.title)
-                    .foregroundStyle(.black)
+                    .font(AppTypographies.title)
+                    .foregroundStyle(AppColors.primaryText)
                     .opacity(
                         calendarViewModel.isLegendCollapsed ? 1 : 0
                     )
@@ -88,14 +88,15 @@ struct CalendarView: View {
             .background(
                 calendarViewModel.isLegendCollapsed
                 ? AnyShapeStyle(Color.white)
-                : AnyShapeStyle(.ultraThickMaterial)
+                : AnyShapeStyle(.ultraThinMaterial)
             )
             .clipShape(
                 RoundedRectangle(
                     cornerRadius: calendarViewModel.isLegendCollapsed ? 70 : 20
                 )
             )
-            .shadow(radius: 8)
+            .shadow(color: .black.opacity(0.04), radius: 16, x: 0, y: 6)
+            .shadow(color: .white.opacity(0.7), radius: 1, x: 0, y: 1)
         }
     }
     
@@ -154,10 +155,10 @@ struct CalendarView: View {
     private func calendarHeader(month: Date) -> some View {
         HStack {
             if month == calendarViewModel.currentMonth {
-                Image(systemName: "calendar").font(.title3).foregroundStyle(.red)
+                Image(systemName: "calendar").font(AppTypographies.title2).foregroundStyle(AppColors.brightPurple)
             }
             Text(month.formatted(.dateTime.month(.abbreviated).year()))
-                .font(.title3).fontWeight(.bold)
+                .font(AppTypographies.title2)
                 .padding(.horizontal, 4)
             Spacer()
         }.onAppear {
@@ -175,9 +176,10 @@ struct CalendarView: View {
                 calendarViewModel.weekDays.enumerated(),
                 id: \.offset
             ) { index, day in
-                Text(day).fontWeight(.semibold)
+                Text(day).font(AppTypographies.bodyEmphasis).foregroundStyle(AppColors.primaryText)
             }
         }
+        .padding(.bottom, 4)
     }
     
     
@@ -239,20 +241,16 @@ struct CalendarView: View {
     private func dayCellLabel(of day: LocalDay) -> some View {
         Text("\(day.day)")
             .frame(width: 45, height: 45)
-            .foregroundColor(.gray)
+            .foregroundColor(AppColors.secondaryText)
             .background(calendarViewModel.getBackgroundColor(for: day))
             .clipShape(.circle)
-            .shadow(
-                color: .black.opacity(0.06),
-                radius: 6,
-                x: 0,
-                y: 2
-            )
+            .shadow(color: .black.opacity(0.04), radius: 16, x: 0, y: 6)
+            .shadow(color: .white.opacity(0.7), radius: 1, x: 0, y: 1)
             .overlay {
                 if calendarViewModel.isToday(day) {
                     Circle().stroke(
-                        Color.black,
-                        style: StrokeStyle(lineWidth: 1)
+                        AppColors.primaryText,
+                        style: StrokeStyle(lineWidth: 0.8)
                     )
                 }
             }
@@ -292,7 +290,7 @@ struct CalendarView: View {
         HStack(alignment: .center) {
             Group {
                 if let symbol = title.symbol {
-                    let size = title == CalendarItems.LegendItemTitle.symptomsLogged ? 8 : 14
+                    let size = title == CalendarItems.LegendItemTitle.symptomsLogged ? 8 : 18
                     let symbolColor = title.symbolColor!
                     Image(systemName: symbol)
                         .font(.system(size: CGFloat(size), weight: .bold))
@@ -314,9 +312,8 @@ struct CalendarView: View {
             }
             
             Text(title.title)
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundStyle(.primary)
+                .font(AppTypographies.body)
+                .foregroundStyle(AppColors.primaryText)
                 .lineLimit(1)
                 .fixedSize(horizontal: true, vertical: false)
         }

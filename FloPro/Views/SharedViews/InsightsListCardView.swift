@@ -30,24 +30,18 @@ struct InsightsListCardView: View {
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                        .font(
-                            .system(size: 24, weight: .bold, design: .rounded)
-                        )
-                        .foregroundStyle(Color(hex: 0x202342))
+                        .font(AppTypographies.title)
+                        .foregroundStyle(AppColors.primaryText)
 
                     Text(subtitle)
-                        .font(
-                            .system(size: 15, weight: .medium, design: .rounded)
-                        )
-                        .foregroundStyle(Color(hex: 0x70738A))
+                        .font(AppTypographies.caption)
+                        .foregroundStyle(AppColors.secondaryText)
                 }
 
                 if rows.isEmpty {
                     Text(emptyMessage)
-                        .font(
-                            .system(size: 16, weight: .medium, design: .rounded)
-                        )
-                        .foregroundStyle(Color(hex: 0x8B8FA7))
+                        .font(AppTypographies.body)
+                        .foregroundStyle(AppColors.primaryText)
                 } else {
                     ForEach(rows) { row in
                         HStack(spacing: 14) {
@@ -61,31 +55,19 @@ struct InsightsListCardView: View {
                                 }
 
                             Text(row.title)
-                                .font(
-                                    .system(
-                                        size: 17,
-                                        weight: .semibold,
-                                        design: .rounded
-                                    )
-                                )
-                                .foregroundStyle(Color(hex: 0x202342))
+                                .font(AppTypographies.body)
+                                .foregroundStyle(AppColors.primaryText)
 
                             Spacer()
 
                             Text(row.detail)
-                                .font(
-                                    .system(
-                                        size: 15,
-                                        weight: .medium,
-                                        design: .rounded
-                                    )
-                                )
-                                .foregroundStyle(Color(hex: 0x8B8FA7))
+                                .font(AppTypographies.caption)
+                                .foregroundStyle(AppColors.secondaryText)
                         }
                     }
                 }
             }
-            .padding(22)
+            .padding()
         }
     }
 }

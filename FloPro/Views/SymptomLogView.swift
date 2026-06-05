@@ -44,8 +44,7 @@ struct SymptomLogView: View {
                     moodSection
                     saveButton
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 20)
+                .padding()
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         }
@@ -61,18 +60,18 @@ struct SymptomLogView: View {
     }
 
     private var header: some View {
-        Text("Symptoms").font(.system(size: 28, weight: .bold, design: .rounded))
+        Text("Symptoms").font(AppTypographies.title)
     }
     
     private var subHeading: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Log for \(formatted(day: day))")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(Color(hex: 0x625D78))
+                .font(AppTypographies.captionEmphasis)
+                .foregroundStyle(AppColors.primaryText)
 
             Text("Choose all symptoms that match how you feel today.")
-                .font(.system(size: 14, weight: .regular))
-                .foregroundStyle(.secondary)
+                .font(AppTypographies.caption)
+                .foregroundStyle(AppColors.secondaryText)
         }
     }
     
@@ -87,8 +86,8 @@ struct SymptomLogView: View {
     private var symptomSection: some View {
         VStack(alignment: .leading, spacing: 18) {
             Text("Physical")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(Color(hex: 0x3F3955))
+                .font(AppTypographies.title2)
+                .foregroundStyle(AppColors.primaryText)
 
             LazyVGrid(
                 columns: Array(repeating: GridItem(.flexible(), spacing: 18), count: 3),
@@ -104,8 +103,8 @@ struct SymptomLogView: View {
     private var moodSection: some View {
         VStack(alignment: .leading, spacing: 18) {
             Text("Emotional")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(Color(hex: 0x3F3955))
+                .font(AppTypographies.title2)
+                .foregroundStyle(AppColors.primaryText)
 
             LazyVGrid(
                 columns: Array(repeating: GridItem(.flexible(), spacing: 18), count: 3),
@@ -157,12 +156,11 @@ struct SymptomLogView: View {
             }
 
             Text(title)
-                .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(Color(hex: 0x4A455F))
+                .font(AppTypographies.button)
+                .foregroundStyle(AppColors.primaryText)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 4)
     }
 
     private var saveButton: some View {
@@ -175,24 +173,19 @@ struct SymptomLogView: View {
             dismiss()
         } label: {
             Text("Save")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.white)
+                .font(AppTypographies.body)
+                .foregroundStyle(AppColors.contrastText)
                 .frame(maxWidth: .infinity)
-                .frame(height: 58)
+                .frame(height: 56)
                 .background(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(isSaveDisabled ? Color.gray.opacity(0.4) : Color(hex: 0xF07DA1))
+                    isSaveDisabled ? AppColors.disabledGradient : AppColors.tertiaryGradient
                 )
-                .shadow(
-                    color: isSaveDisabled ? .clear : Color(hex: 0xF07DA1).opacity(0.25),
-                    radius: 16,
-                    x: 0,
-                    y: 10
-                )
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .shadow(color: isSaveDisabled ? .clear : .black.opacity(0.04), radius: 16, x: 0, y: 6)
+                .shadow(color: isSaveDisabled ? .clear : .white.opacity(0.7), radius: 1, x: 0, y: 1)
         }
         .buttonStyle(.plain)
         .disabled(isSaveDisabled)
-        .padding(.top, 4)
     }
 
     private func toggleSelection(for item: SymptomItem) {

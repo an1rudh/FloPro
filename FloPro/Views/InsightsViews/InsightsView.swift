@@ -27,7 +27,7 @@ struct InsightsView: View {
                         InsightsSleepView()
                     }
                 }
-                .padding(.horizontal)
+                .padding()
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -40,7 +40,7 @@ struct InsightsView: View {
 
     private var header: some View {
             Text("Insights")
-                .font(.system(size: 28, weight: .bold, design: .rounded))
+            .font(AppTypographies.title)
     }
 
     private var sectionPicker: some View {
@@ -51,20 +51,20 @@ struct InsightsView: View {
                     selectedSection = section
                 } label: {
                     Text(section.title)
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(AppTypographies.caption)
                         .foregroundStyle(
                             selectedSection == section
-                                ? Color(hex: 0x8F71D9)
-                                : Color(hex: 0x70738A)
+                            ? AppColors.contrastText
+                            : AppColors.primaryText
                         )
                         .lineLimit(1)
-                        .frame(width: 85, height: 38)
+                        .frame(width: 84, height: 38)
                         .background(
                             Capsule(style: .circular)
                                 .fill(
                                     selectedSection == section
-                                        ? Color(hex: 0xEEE7FF)
-                                        : Color.white
+                                    ? AppColors.primaryPurple
+                                    : AppColors.cardBackground
                                 )
                         )
                 }
